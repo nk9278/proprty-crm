@@ -97,3 +97,17 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Schema: Isolated provider settings (`whatsapp_accounts`) distinctly from history ledgers (`whatsapp_messages`), avoiding logic tightly coupling Gupshup/Twilio definitions against basic text strings natively. Implemented Consents mapping table (`communication_consents`).
   - [x] API: Wrote `api/whatsapp.php` checking boundaries gracefully. Returns explicit configuration errors instead of faking HTTP200 OKs. Verified `tenant_id` blocks evaluating consent bounds internally.
   - [x] UI: Set up `whatsapp/index.php` template logic matching the primary Dashboard palette standards.
+
+### Phase 16: Marketing & Campaigns
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Generated robust schema encapsulating multi-tier `ad_platforms`, `ad_accounts`, `campaigns`, `ad_sets`, and tracking parameters inside `marketing_leads`. Added open `webhook_logs` architecture parsing safely.
+  - [x] API: Mapped `api/marketing.php` for controlling Campaign creation bound exclusively behind tenant ownership validations avoiding cross-account mutations (IDOR blocks passed). Built idempotent validation inside `api/webhooks.php` catching external duplicate event streams securely.
+  - [x] UI/Security: Tested `/marketing/index.php`. Output data passes exclusively through `escapeHTML()` bindings defending against stored/reflected XSS tracking payload data.
+
+### Phase 17: Reports & Analytics
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added specific views mapping directly to robust database queries resolving relational logic over `users`, `bookings`, `booking_cost_sheets` effectively avoiding repeating internal datasets.
+  - [x] API: Mapped `api/reports.php` enabling multi-tenant isolated metrics returned through secure endpoint routes bounding against `reports.view` and `reports.export` checks. Output mathematical outputs are generated logically on native numeric outputs.
+  - [x] UI/Security: Evaluated `reports/index.php` matching Zopa CRM specifications explicitly defending against stored XSS inputs via output logic rendering utilizing CSS grid for visual layouts. Data mapping exported reliably.

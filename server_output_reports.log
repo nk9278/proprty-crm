@@ -1,0 +1,25 @@
+[Sun Sep 13 19:26:10 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 19:27:06 2026] [::1]:59440 Accepted
+[Sun Sep 13 19:27:06 2026] [::1]:59440 [200]: GET /auth/login.php
+[Sun Sep 13 19:27:06 2026] [::1]:59440 Closing
+[Sun Sep 13 19:27:07 2026] [::1]:59454 Accepted
+[Sun Sep 13 19:27:07 2026] [::1]:59454 [302]: POST /auth/login.php
+[Sun Sep 13 19:27:07 2026] [::1]:59454 Closing
+[Sun Sep 13 19:27:07 2026] [::1]:59460 Accepted
+[Sun Sep 13 19:27:07 2026] [::1]:59460 [200]: GET /dashboard.php
+[Sun Sep 13 19:27:07 2026] [::1]:59460 Closing
+[Sun Sep 13 19:27:07 2026] [::1]:59464 Accepted
+[Sun Sep 13 19:27:07 2026] [::1]:59470 Accepted
+[Sun Sep 13 19:27:07 2026] [::1]:59464 [403]: GET /api/tasks.php?action=list&status=Pending
+[Sun Sep 13 19:27:07 2026] [::1]:59464 Closing
+[Sun Sep 13 19:27:07 2026] [::1]:59470 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 19:27:07 2026] [::1]:59470 Closing
+[Sun Sep 13 19:27:09 2026] [::1]:59484 Accepted
+[Sun Sep 13 19:27:09 2026] [::1]:59484 [200]: GET /reports/index.php
+[Sun Sep 13 19:27:09 2026] [::1]:59484 Closing
+[Sun Sep 13 19:27:09 2026] [::1]:59490 Accepted
+[Sun Sep 13 19:27:09 2026] [::1]:59502 Accepted
+[Sun Sep 13 19:27:09 2026] [::1]:59490 [200]: GET /api/reports.php?action=dashboard_kpis
+[Sun Sep 13 19:27:09 2026] [::1]:59490 Closing
+[Sun Sep 13 19:27:09 2026] [::1]:59502 [200]: GET /api/reports.php?action=sales_performance
+[Sun Sep 13 19:27:09 2026] [::1]:59502 Closing

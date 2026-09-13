@@ -169,3 +169,23 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT 1, id FROM permissions WHERE name LIKE 'whatsapp.%';
+
+-- PHASE 16: MARKETING PERMISSIONS & DATA
+INSERT IGNORE INTO permissions (name, description) VALUES
+('marketing.view', 'View Marketing Campaigns and ROI'),
+('marketing.manage', 'Manage Ad Accounts and Campaigns'),
+('webhooks.view', 'View Webhook Logs');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'marketing.%' OR name LIKE 'webhooks.%';
+
+INSERT IGNORE INTO ad_platforms (name) VALUES
+('Meta'), ('Google Ads'), ('Website'), ('Property Portal'), ('Other');
+
+-- PHASE 17: REPORTS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('reports.view', 'View Advanced Reports and Analytics'),
+('reports.export', 'Export Reports to CSV/PDF');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'reports.%';

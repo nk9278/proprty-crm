@@ -776,3 +776,111 @@ CREATE TABLE IF NOT EXISTS whatsapp_messages (
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 16: MARKETING + CAMPAIGNS + LEAD SOURCES
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS ad_platforms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ad_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    platform_id INT NOT NULL,
+    account_name VARCHAR(255) NOT NULL,
+    external_account_id VARCHAR(255) NULL,
+    status ENUM('Active', 'Inactive', 'Unconfigured') DEFAULT 'Unconfigured',
+    currency VARCHAR(10) DEFAULT 'INR',
+    timezone VARCHAR(100) DEFAULT 'UTC',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (platform_id) REFERENCES ad_platforms(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS campaigns (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    ad_account_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    external_campaign_id VARCHAR(255) NULL,
+    objective VARCHAR(100) NULL,
+    status ENUM('Draft', 'Active', 'Paused', 'Completed', 'Archived') DEFAULT 'Draft',
+    start_date DATE NULL,
+    end_date DATE NULL,
+    budget DECIMAL(15,2) DEFAULT 0.00,
+    spend DECIMAL(15,2) DEFAULT 0.00,
+    impressions INT DEFAULT 0,
+    reach INT DEFAULT 0,
+    clicks INT DEFAULT 0,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (ad_account_id) REFERENCES ad_accounts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ad_sets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    campaign_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    external_adset_id VARCHAR(255) NULL,
+    budget DECIMAL(15,2) DEFAULT 0.00,
+    status ENUM('Active', 'Paused', 'Archived') DEFAULT 'Active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    ad_set_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    external_ad_id VARCHAR(255) NULL,
+    landing_url TEXT NULL,
+    status ENUM('Active', 'Paused', 'Archived') DEFAULT 'Active',
+    spend DECIMAL(15,2) DEFAULT 0.00,
+    impressions INT DEFAULT 0,
+    clicks INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (ad_set_id) REFERENCES ad_sets(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS marketing_leads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    lead_id INT NOT NULL,
+    campaign_id INT NULL,
+    ad_set_id INT NULL,
+    ad_id INT NULL,
+    utm_source VARCHAR(100) NULL,
+    utm_medium VARCHAR(100) NULL,
+    utm_campaign VARCHAR(100) NULL,
+    utm_content VARCHAR(100) NULL,
+    utm_term VARCHAR(100) NULL,
+    landing_page TEXT NULL,
+    referrer TEXT NULL,
+    external_lead_id VARCHAR(255) NULL,
+    attribution_type ENUM('First Touch', 'Last Touch') DEFAULT 'First Touch',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE SET NULL,
+    FOREIGN KEY (ad_set_id) REFERENCES ad_sets(id) ON DELETE SET NULL,
+    FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS webhook_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NULL,
+    provider VARCHAR(100) NOT NULL,
+    event_type VARCHAR(100) NULL,
+    external_event_id VARCHAR(255) NULL,
+    payload JSON NULL,
+    processing_status ENUM('Pending', 'Processed', 'Failed', 'Ignored') DEFAULT 'Pending',
+    error_message TEXT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
