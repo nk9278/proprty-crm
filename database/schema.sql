@@ -414,3 +414,28 @@ CREATE TABLE IF NOT EXISTS lead_tag_map (
     FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES lead_tags(id) ON DELETE CASCADE
 );ALTER TABLE customers ADD FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL;
+CREATE TABLE IF NOT EXISTS property_shares (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    lead_id INT NULL,
+    customer_id INT NULL,
+    shared_by INT NOT NULL,
+    channel ENUM('WhatsApp', 'SMS', 'Email', 'Link', 'CRM Internal') NOT NULL,
+    message TEXT,
+    status ENUM('Sent', 'Delivered', 'Read', 'Failed') DEFAULT 'Sent',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (shared_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS property_share_items (
+    share_id INT NOT NULL,
+    property_id INT NOT NULL,
+    unit_id INT,
+    PRIMARY KEY (share_id, property_id),
+    FOREIGN KEY (share_id) REFERENCES property_shares(id) ON DELETE CASCADE,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (unit_id) REFERENCES property_units(id) ON DELETE SET NULL
+);

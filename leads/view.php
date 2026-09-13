@@ -111,6 +111,13 @@ $csrf_token = generateCsrfToken();
                 <!-- Followups will go here -->
             </ul>
         </div>
+
+        <div class="card">
+            <div class="card-header">Share History</div>
+            <ul class="timeline" id="sharesList">
+                <!-- Share history will go here -->
+            </ul>
+        </div>
     </div>
 
     <!-- Sidebar -->
@@ -131,9 +138,12 @@ $csrf_token = generateCsrfToken();
         <div class="card">
             <div class="card-header">Quick Actions</div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <?php if(hasPermission('properties.view')): ?>
+                <a href="/leads/match.php?lead_id=<?php echo $lead_id; ?>" class="btn">Find Matching Properties</a>
+                <?php endif; ?>
                 <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
                 <?php if(hasPermission('leads.edit')): ?>
-                <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn" id="action_edit">Edit Lead</a>
+                <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn btn-outline" id="action_edit">Edit Lead</a>
                 <?php endif; ?>
                 <?php if(hasPermission('leads.assign')): ?>
                 <a href="#" class="btn btn-outline" id="action_assign">Assign Lead</a>
@@ -273,6 +283,29 @@ function loadLead() {
             const errMsg = document.getElementById('error_msg');
             errMsg.style.display = 'block';
             errMsg.textContent = 'A network error occurred while loading the lead profile.';
+        });
+
+    // Fetch Shares
+    fetch('/api/property-sharing.php?action=history&lead_id=' + leadId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const sharesList = document.getElementById('sharesList');
+                sharesList.innerHTML = '';
+                if (res.data.length > 0) {
+                    res.data.forEach(s => {
+                        sharesList.innerHTML += `
+                            <li class="timeline-item">
+                                <span class="timeline-date">${new Date(s.created_at).toLocaleString()} | ${escapeHTML(s.shared_by)}</span>
+                                Shared <strong>${escapeHTML(s.properties_shared)} property/ies</strong> via <strong>${escapeHTML(s.channel)}</strong>.<br>
+                                <span style="font-size: 0.8rem; color: #666;">Status: ${escapeHTML(s.status)}</span>
+                            </li>
+                        `;
+                    });
+                } else {
+                    sharesList.innerHTML = '<li class="timeline-item">No properties have been shared yet.</li>';
+                }
+            }
         });
 }
 

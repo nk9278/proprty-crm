@@ -98,18 +98,35 @@ if (!$customer_id) {
                 <div class="detail-value" id="val_created">-</div>
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-header">Share History</div>
+            <ul class="timeline" id="sharesList" style="list-style: none; padding: 0; margin: 0;">
+                <!-- Share history will go here -->
+            </ul>
+        </div>
     </div>
 
+    <!-- Sidebar -->
     <div>
         <div class="card">
             <div class="card-header">Quick Actions</div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <?php if(hasPermission('properties.view')): ?>
+                <a href="/leads/match.php?customer_id=<?php echo $customer_id; ?>" class="btn">Find Matching Properties</a>
+                <?php endif; ?>
                 <a href="#" class="btn btn-outline" onclick="alert('Phase 7 Integration placeholder')">Book Property</a>
                 <a href="#" class="btn btn-outline" onclick="alert('Phase 18 Integration placeholder')">Upload Document</a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.timeline-item { position: relative; padding-left: 1.5rem; margin-bottom: 1rem; font-size: 0.9rem; border-left: 2px solid #ddd; }
+.timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background-color: #CF1F3C; border-radius: 50%; }
+.timeline-date { color: #888; font-size: 0.8rem; display: block; margin-bottom: 0.2rem;}
+</style>
 
 <script>
 function escapeHTML(str) {
@@ -158,6 +175,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const errMsg = document.getElementById('error_msg');
             errMsg.style.display = 'block';
             errMsg.textContent = 'A network error occurred.';
+        });
+
+    // Fetch Shares
+    fetch('/api/property-sharing.php?action=history&customer_id=' + custId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const sharesList = document.getElementById('sharesList');
+                sharesList.innerHTML = '';
+                if (res.data.length > 0) {
+                    res.data.forEach(s => {
+                        sharesList.innerHTML += `
+                            <li class="timeline-item">
+                                <span class="timeline-date">${new Date(s.created_at).toLocaleString()} | ${escapeHTML(s.shared_by)}</span>
+                                Shared <strong>${escapeHTML(s.properties_shared)} property/ies</strong> via <strong>${escapeHTML(s.channel)}</strong>.<br>
+                                <span style="font-size: 0.8rem; color: #666;">Status: ${escapeHTML(s.status)}</span>
+                            </li>
+                        `;
+                    });
+                } else {
+                    sharesList.innerHTML = '<li class="timeline-item">No properties have been shared yet.</li>';
+                }
+            }
         });
 });
 </script>
