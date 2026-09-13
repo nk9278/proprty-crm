@@ -82,3 +82,18 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Schema: Created `payment_plans`, `payment_milestones`, and `payments` tables with required precision logic `DECIMAL(15,2)` and tenant cascading constraints.
   - [x] API: Generated `api/payments.php`. Tested bounds enforcing payments not exceeding available outstanding balances, securing endpoints from floating point subtraction attack vectors yielding unauthoritative balance records. Used `FOR UPDATE` read locks to guarantee calculation stability.
   - [x] UI/Security: Tested `/bookings/view.php` which leverages Playwright automated interactions to submit Cheque forms via Fetch. Math successfully subtracts off `outstanding_amount` tracking while summing on `amount_received`. Appends `action=record` events mapped to secure IDs inside Audit logs tracking correctly. Output uses Javascript DOM mutations bounded securely via `escapeHTML` to defend against reflected JSON inputs.
+
+### Phase 14: Channel Partners & Commissions
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Built tables handling complex split ratios mapped correctly through relational `tenant_id` blocks guaranteeing logical multi-tenant isolation.
+  - [x] API: Wrote `api/commissions.php` locking rows via `FOR UPDATE` strictly defending payout requests to prevent drawing over limits logic inside mathematical injections. Computations execute fully isolated Server-Side deriving authoritative metrics from underlying `booking_cost_sheets`.
+  - [x] Security: Verified logical limits and added RBAC tracking checks (`commissions.manage`, `payouts.create`, etc).
+  - [x] UI: Handled display elements via strict `escapeHTML` JS conversions blocking Reflected XSS outputs on client. Validated via Playwright.
+
+### Phase 15: WhatsApp / Communication Architecture
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Isolated provider settings (`whatsapp_accounts`) distinctly from history ledgers (`whatsapp_messages`), avoiding logic tightly coupling Gupshup/Twilio definitions against basic text strings natively. Implemented Consents mapping table (`communication_consents`).
+  - [x] API: Wrote `api/whatsapp.php` checking boundaries gracefully. Returns explicit configuration errors instead of faking HTTP200 OKs. Verified `tenant_id` blocks evaluating consent bounds internally.
+  - [x] UI: Set up `whatsapp/index.php` template logic matching the primary Dashboard palette standards.

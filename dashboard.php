@@ -50,6 +50,7 @@ requireLogin();
         <a href="/pipeline/index.php">Pipeline</a>
         <a href="/properties/index.php">Inventory</a>
         <a href="/site_visits/index.php">Site Visits</a>
+        <a href="/channel_partners/index.php">Partners</a>
         <a href="/tasks/index.php">Tasks</a>
         <?php if(hasPermission('Tenant Owner')): ?>
         <a href="/settings/index.php">Settings</a>

@@ -641,3 +641,138 @@ CREATE TABLE IF NOT EXISTS payments (
     FOREIGN KEY (milestone_id) REFERENCES payment_milestones(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 14: CHANNEL PARTNERS & COMMISSIONS
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS commission_rules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    rule_type ENUM('Percentage', 'Fixed', 'Slab', 'Property', 'Project', 'Broker', 'Salesperson') NOT NULL,
+    value DECIMAL(10,2) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS channel_partners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    contact_person VARCHAR(255) NOT NULL,
+    mobile VARCHAR(20) NOT NULL,
+    whatsapp VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+    address TEXT NULL,
+    gst_number VARCHAR(50) NULL,
+    pan_number VARCHAR(20) NULL,
+    rera_number VARCHAR(100) NULL,
+    commission_rule_id INT NULL,
+    status ENUM('Active', 'Inactive', 'Suspended', 'Archived') DEFAULT 'Active',
+    notes TEXT NULL,
+    assigned_manager_id INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (commission_rule_id) REFERENCES commission_rules(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_manager_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS commissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    channel_partner_id INT NULL,
+    salesperson_id INT NULL,
+    commission_rule_id INT NULL,
+    base_amount DECIMAL(15,2) NOT NULL, -- Total value the commission is calculated on
+    commission_amount DECIMAL(15,2) NOT NULL,
+    status ENUM('Estimated', 'Eligible', 'Pending Approval', 'Approved', 'Partially Paid', 'Paid', 'Cancelled', 'Reversed') DEFAULT 'Estimated',
+    amount_paid DECIMAL(15,2) DEFAULT 0.00,
+    outstanding_amount DECIMAL(15,2) DEFAULT 0.00,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (channel_partner_id) REFERENCES channel_partners(id) ON DELETE SET NULL,
+    FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (commission_rule_id) REFERENCES commission_rules(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS commission_payouts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    commission_id INT NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    payout_date DATE NOT NULL,
+    payment_method ENUM('Bank Transfer', 'Cheque', 'Cash', 'Other') NOT NULL,
+    transaction_reference VARCHAR(255) NULL,
+    status ENUM('Pending', 'Approved', 'Paid', 'Reversed', 'Cancelled') DEFAULT 'Paid',
+    notes TEXT,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (commission_id) REFERENCES commissions(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 15: WHATSAPP / COMMUNICATION ARCHITECTURE
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS whatsapp_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    salesperson_id INT NULL,
+    provider_name VARCHAR(100) NOT NULL, -- e.g. Twilio, Meta, Gupshup (Architecture foundation)
+    phone_number VARCHAR(50) NOT NULL,
+    api_key VARCHAR(255) NULL,
+    api_secret VARCHAR(255) NULL,
+    status ENUM('Active', 'Disconnected', 'Unconfigured') DEFAULT 'Unconfigured',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS communication_consents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    customer_id INT NULL,
+    lead_id INT NULL,
+    mobile VARCHAR(20) NOT NULL,
+    has_consent TINYINT(1) DEFAULT 1,
+    opt_in_timestamp DATETIME NULL,
+    opt_in_source VARCHAR(100) NULL,
+    opt_out_timestamp DATETIME NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS message_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS whatsapp_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    whatsapp_account_id INT NOT NULL,
+    lead_id INT NULL,
+    customer_id INT NULL,
+    sender_id INT NOT NULL,
+    direction ENUM('Outbound', 'Inbound') NOT NULL,
+    message_type ENUM('Text', 'Template', 'Media', 'Location', 'Link') DEFAULT 'Text',
+    content TEXT NULL,
+    media_url VARCHAR(255) NULL,
+    delivery_status ENUM('Sent', 'Delivered', 'Read', 'Failed') DEFAULT 'Sent',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (whatsapp_account_id) REFERENCES whatsapp_accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -147,3 +147,25 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT 1, id FROM permissions WHERE name LIKE 'payments.%';
+
+-- PHASE 14: COMMISSION AND CHANNEL PARTNER PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('partners.view', 'View Channel Partners'),
+('partners.create', 'Create Channel Partners'),
+('partners.edit', 'Edit Channel Partners'),
+('commissions.view', 'View Commissions'),
+('commissions.manage', 'Calculate and Create Commissions'),
+('commissions.approve', 'Approve Commissions'),
+('payouts.create', 'Record Commission Payouts');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'partners.%' OR name LIKE 'commissions.%' OR name LIKE 'payouts.%';
+
+-- PHASE 15: WHATSAPP/COMMUNICATION PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('whatsapp.view', 'View WhatsApp Messages'),
+('whatsapp.send', 'Send WhatsApp Messages'),
+('whatsapp.manage', 'Manage WhatsApp Accounts and Templates');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'whatsapp.%';

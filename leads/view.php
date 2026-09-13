@@ -177,6 +177,9 @@ $csrf_token = generateCsrfToken();
                 <a href="/leads/match.php?lead_id=<?php echo $lead_id_safe; ?>" class="btn">Find Matching Properties</a>
                 <?php endif; ?>
                 <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
+                <?php if(hasPermission('whatsapp.send')): ?>
+                <a href="#" class="btn btn-outline" onclick="sendWhatsApp()">Send WhatsApp</a>
+                <?php endif; ?>
                 <?php if(hasPermission('leads.edit')): ?>
                 <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn btn-outline" id="action_edit">Edit Lead</a>
                 <?php endif; ?>
@@ -388,6 +391,23 @@ function loadLead() {
                 }
             });
     });
+
+    function sendWhatsApp() {
+        const msg = prompt("Enter your WhatsApp message:");
+        if (!msg) return;
+
+        const fd = new FormData();
+        fd.append('action', 'send');
+        fd.append('lead_id', leadId);
+        fd.append('content', msg);
+        fd.append('csrf_token', csrfToken);
+
+        fetch('/api/whatsapp.php', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                alert(res.message); // Should alert mock failure
+            });
+    }
 
     // Fetch Shares
     fetch('/api/property-sharing.php?action=history&lead_id=' + leadId)

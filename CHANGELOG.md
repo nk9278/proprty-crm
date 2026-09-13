@@ -14,3 +14,11 @@
 
 ## Phase 13 - Payments & Collections
 - Attached payment structures inside `bookings/view.php` allowing manual ledger tracking entries inside the Sales Pipeline structures. Payments gracefully decrease outstanding ledger volumes without breaching absolute minimums structurally mapped at `DECIMAL(15,2)` capacities.
+
+## Phase 14 - Commission + Channel Partners
+- Constructed the mathematical and structural dependencies bounding Brokers explicitly to underlying CRM Bookings securely.
+- Integrated fractional calculation boundaries into `/bookings/view.php` relying natively on standard API evaluations isolating math components entirely away from the Client DOM securely.
+
+## Phase 15 - WhatsApp Architecture
+- Deployed schemas handling explicit multi-provider API tracking, explicitly enforcing internal opt-in / opt-out constraints logically.
+- UI elements fail gracefully when configurations are inactive instead of pretending delivery occurred.

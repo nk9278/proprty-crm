@@ -105,6 +105,51 @@ function renderBooking(b) {
                 </div>
             </div>
 
+            <div class="card" id="commissionsModule">
+                <div class="card-header">Commissions & Brokerage</div>
+                <form id="recordCommissionForm" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 4px; border: 1px solid #cbd5e1;">
+                    <h4 style="margin-top:0; margin-bottom:1rem;">Map Commission</h4>
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="action" value="calculate">
+                    <input type="hidden" name="booking_id" value="<?php echo $id_safe; ?>">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label>Channel Partner ID</label><br>
+                            <input type="number" name="channel_partner_id" style="width:100%; padding:0.5rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label>OR Salesperson ID</label><br>
+                            <input type="number" name="salesperson_id" style="width:100%; padding:0.5rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label>Percentage (%)</label><br>
+                            <input type="number" step="0.01" name="percentage" style="width:100%; padding:0.5rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label>OR Fixed Amount</label><br>
+                            <input type="number" step="0.01" name="fixed_amount" style="width:100%; padding:0.5rem; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Map Commission</button>
+                    <div id="commMsg" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </form>
+
+                <h4 style="margin-bottom:0.5rem;">Allocated Commissions</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; border-bottom:1px solid #ccc; padding:0.5rem;">Partner / Agent</th>
+                            <th style="text-align:left; border-bottom:1px solid #ccc; padding:0.5rem;">Amount</th>
+                            <th style="text-align:left; border-bottom:1px solid #ccc; padding:0.5rem;">Status / Outstanding</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commissionsTableBody">
+                        <tr><td colspan="3" style="padding:0.5rem; text-align:center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="card" id="paymentsModulePlaceholder">
                 <div class="card-header">Payments & Collections</div>
 
@@ -178,6 +223,34 @@ function renderBooking(b) {
     `;
 }
 
+function loadCommissions() {
+    fetch('/api/commissions.php?action=list_for_booking&booking_id=' + encodeURIComponent(bookingId))
+        .then(r => r.json())
+        .then(res => {
+            const tbody = document.getElementById('commissionsTableBody');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if (res.status === 'success' && res.data.length > 0) {
+                res.data.forEach(c => {
+                    const name = c.company_name || c.salesperson_name || 'Unknown';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee;"><strong>${escapeHTML(name)}</strong></td>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee;">Base: ${escapeHTML(c.base_amount)}<br>Comm: <strong>${escapeHTML(c.commission_amount)}</strong></td>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee;">
+                                <span class="badge">${escapeHTML(c.status)}</span><br>
+                                <small style="color:red">Out: ${escapeHTML(c.outstanding_amount)}</small>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="padding:0.5rem; text-align:center;">No commissions allocated yet.</td></tr>';
+            }
+        });
+}
+
 function loadPayments() {
     fetch('/api/payments.php?action=list_for_booking&booking_id=' + encodeURIComponent(bookingId))
         .then(r => r.json())
@@ -204,6 +277,28 @@ function loadPayments() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const commForm = document.getElementById('recordCommissionForm');
+    if (commForm) {
+        commForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fd = new FormData(this);
+            const msg = document.getElementById('commMsg');
+            fetch('/api/commissions.php', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(res => {
+                    if(res.status === 'success') {
+                        msg.style.color = 'green';
+                        msg.textContent = res.message;
+                        this.reset();
+                        loadCommissions();
+                    } else {
+                        msg.style.color = 'red';
+                        msg.textContent = res.message;
+                    }
+                });
+        });
+    }
+
     const form = document.getElementById('recordPaymentForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -252,6 +347,7 @@ function cancelBooking() {
 document.addEventListener('DOMContentLoaded', () => {
     loadBooking();
     loadPayments();
+    loadCommissions();
 });
 </script>
 

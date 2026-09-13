@@ -1,0 +1,19 @@
+[Sun Sep 13 18:08:29 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 18:08:32 2026] [::1]:36024 Accepted
+[Sun Sep 13 18:08:32 2026] [::1]:36024 [200]: GET /auth/login.php
+[Sun Sep 13 18:08:32 2026] [::1]:36024 Closing
+[Sun Sep 13 18:08:33 2026] [::1]:48458 Accepted
+[Sun Sep 13 18:08:33 2026] [::1]:48458 [200]: POST /auth/login.php
+[Sun Sep 13 18:08:33 2026] [::1]:48458 Closing
+[Sun Sep 13 18:08:35 2026] [::1]:48464 Accepted
+[Sun Sep 13 18:08:35 2026] [::1]:48464 [302]: GET /leads/view.php?id=1
+[Sun Sep 13 18:08:35 2026] [::1]:48464 Closing
+[Sun Sep 13 18:08:35 2026] [::1]:48470 Accepted
+[Sun Sep 13 18:08:35 2026] [::1]:48470 [200]: GET /auth/login.php
+[Sun Sep 13 18:08:35 2026] [::1]:48470 Closing
+[Sun Sep 13 18:08:37 2026] [::1]:48486 Accepted
+[Sun Sep 13 18:08:37 2026] [::1]:48486 [302]: GET /whatsapp/index.php
+[Sun Sep 13 18:08:37 2026] [::1]:48486 Closing
+[Sun Sep 13 18:08:37 2026] [::1]:48492 Accepted
+[Sun Sep 13 18:08:37 2026] [::1]:48492 [200]: GET /auth/login.php
+[Sun Sep 13 18:08:37 2026] [::1]:48492 Closing
