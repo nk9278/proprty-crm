@@ -151,7 +151,7 @@ $customer_id_safe = htmlspecialchars($customer_id);
                 <a href="/leads/match.php?customer_id=<?php echo $customer_id_safe; ?>" class="btn">Find Matching Properties</a>
                 <?php endif; ?>
                 <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
-                <a href="#" class="btn btn-outline" onclick="alert('Phase 7 Integration placeholder')">Book Property</a>
+                <a href="/bookings/create.php?customer_id=<?php echo $customer_id_safe; ?>" class="btn btn-outline">Book Property</a>
                 <a href="#" class="btn btn-outline" onclick="alert('Phase 18 Integration placeholder')">Upload Document</a>
             </div>
         </div>

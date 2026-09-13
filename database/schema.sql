@@ -535,3 +535,109 @@ CREATE TABLE IF NOT EXISTS site_visits (
     FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ==========================================================
+-- PHASE 12: BOOKINGS & COST SHEETS
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_reference VARCHAR(100) NOT NULL,
+    lead_id INT NULL,
+    customer_id INT NOT NULL,
+    project_id INT NULL,
+    property_id INT NULL,
+    unit_id INT NOT NULL,
+    salesperson_id INT NOT NULL,
+    broker_id INT NULL,
+    booking_date DATE NOT NULL,
+    status ENUM('Draft', 'Token Pending', 'Token Received', 'Booked', 'Cancelled', 'Closed') DEFAULT 'Draft',
+    notes TEXT,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (unit_id) REFERENCES property_units(id) ON DELETE CASCADE,
+    FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (broker_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS booking_cost_sheets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    base_price DECIMAL(15,2) DEFAULT 0.00,
+    plc DECIMAL(15,2) DEFAULT 0.00,
+    floor_rise DECIMAL(15,2) DEFAULT 0.00,
+    parking DECIMAL(15,2) DEFAULT 0.00,
+    club_charges DECIMAL(15,2) DEFAULT 0.00,
+    maintenance DECIMAL(15,2) DEFAULT 0.00,
+    edc DECIMAL(15,2) DEFAULT 0.00,
+    idc DECIMAL(15,2) DEFAULT 0.00,
+    gst DECIMAL(15,2) DEFAULT 0.00,
+    other_charges DECIMAL(15,2) DEFAULT 0.00,
+    discount DECIMAL(15,2) DEFAULT 0.00,
+    final_amount DECIMAL(15,2) DEFAULT 0.00,
+    token_amount DECIMAL(15,2) DEFAULT 0.00,
+    amount_received DECIMAL(15,2) DEFAULT 0.00,
+    outstanding_amount DECIMAL(15,2) DEFAULT 0.00,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 13: PAYMENTS & COLLECTIONS
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS payment_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    plan_type ENUM('Construction-linked', 'Time-linked', 'Custom') DEFAULT 'Custom',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS payment_milestones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    payment_plan_id INT NOT NULL,
+    milestone_name VARCHAR(255) NOT NULL,
+    percentage DECIMAL(5,2) DEFAULT 0.00,
+    amount DECIMAL(15,2) NOT NULL,
+    due_date DATE NULL,
+    status ENUM('Pending', 'Due', 'Partially Paid', 'Paid', 'Overdue', 'Cancelled') DEFAULT 'Pending',
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (payment_plan_id) REFERENCES payment_plans(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    milestone_id INT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    payment_date DATE NOT NULL,
+    payment_mode ENUM('Cash', 'Cheque', 'Bank Transfer', 'Credit Card', 'Online', 'Other') NOT NULL,
+    transaction_reference VARCHAR(255) NULL,
+    receipt_number VARCHAR(100) NULL,
+    status ENUM('Pending', 'Completed', 'Failed', 'Refunded') DEFAULT 'Completed',
+    notes TEXT,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (milestone_id) REFERENCES payment_milestones(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

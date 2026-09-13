@@ -67,3 +67,18 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Security: Strictly implemented `pipeline.manage` and `leads.edit` dependencies for updating stage tracking variables. IDOR tests performed against foreign resources and correctly bounced `404` errors.
   - [x] UI: Drag-and-drop HTML5 UI written with no external javascript frameworks (e.g. strict Vanilla JS usage per stack specs).
   - [x] Testing: Verified Kanban layout output via Playwright execution. Appended tracking ID to Dashboard's top bar layout properly.
+
+### Phase 12: Bookings + Cost Sheets
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added `bookings` and `booking_cost_sheets` adhering strictly to Multi-Tenant constraints. Initialized correctly.
+  - [x] API: Wrote `api/bookings.php`. Leveraged MySQL's `FOR UPDATE` clause when performing transition state validations against inventory structures (`property_units`).
+  - [x] Logic Validations: Moved complete mathematical computations of the Cost Sheet line-items from the Client to the API server block, defending against floating-point manipulation injections.
+  - [x] UI/Security: Tested `/bookings/create.php` and verified frontend math parsing. Reintegrated the Booking forms securely back into `/customers/view.php`. Checked `html_entity_decode` paths across variables.
+
+### Phase 13: Payments + Collections
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Created `payment_plans`, `payment_milestones`, and `payments` tables with required precision logic `DECIMAL(15,2)` and tenant cascading constraints.
+  - [x] API: Generated `api/payments.php`. Tested bounds enforcing payments not exceeding available outstanding balances, securing endpoints from floating point subtraction attack vectors yielding unauthoritative balance records. Used `FOR UPDATE` read locks to guarantee calculation stability.
+  - [x] UI/Security: Tested `/bookings/view.php` which leverages Playwright automated interactions to submit Cheque forms via Fetch. Math successfully subtracts off `outstanding_amount` tracking while summing on `amount_received`. Appends `action=record` events mapped to secure IDs inside Audit logs tracking correctly. Output uses Javascript DOM mutations bounded securely via `escapeHTML` to defend against reflected JSON inputs.

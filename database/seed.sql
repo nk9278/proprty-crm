@@ -126,3 +126,24 @@ INSERT IGNORE INTO pipeline_stages (tenant_id, name, sort_order, is_system) VALU
 (2, 'Payment', 9, 1),
 (2, 'Agreement', 10, 1),
 (2, 'Closed/Lost', 11, 1);
+
+-- PHASE 12: BOOKINGS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('bookings.view', 'View Bookings'),
+('bookings.create', 'Create Bookings'),
+('bookings.edit', 'Edit Bookings'),
+('bookings.cancel', 'Cancel Bookings'),
+('financials.view', 'View Financial Values / Cost Sheets'),
+('financials.edit', 'Modify Financial Values / Cost Sheets');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'bookings.%' OR name LIKE 'financials.%';
+
+-- PHASE 13: PAYMENTS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('payments.view', 'View Payments'),
+('payments.create', 'Record Payments'),
+('payments.edit', 'Edit/Manage Payments');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'payments.%';
