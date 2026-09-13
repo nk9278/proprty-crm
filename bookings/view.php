@@ -150,6 +150,47 @@ function renderBooking(b) {
                 </table>
             </div>
 
+            <div class="card" id="documentsModule">
+                <div class="card-header">Documents</div>
+                <form id="uploadDocForm" style="margin-bottom: 1.5rem;" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="action" value="upload">
+                    <input type="hidden" name="entity_type" value="Booking">
+                    <input type="hidden" name="entity_id" value="<?php echo $id_safe; ?>">
+
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap:wrap;">
+                        <select name="category" required style="padding:0.5rem;">
+                            <option value="Booking / Sales">Booking / Sales</option>
+                            <option value="Customer / KYC">Customer / KYC</option>
+                        </select>
+                        <select name="document_type" required style="padding:0.5rem;">
+                            <option value="Booking Form">Booking Form</option>
+                            <option value="Agreement">Agreement</option>
+                            <option value="Payment Receipt">Payment Receipt</option>
+                            <option value="PAN">PAN</option>
+                            <option value="Aadhaar">Aadhaar</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="file" name="document" required style="padding:0.5rem;" accept=".pdf,.jpg,.jpeg,.png,.webp,.csv,.doc,.docx">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">Upload Document</button>
+                    <div id="uploadMsg" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </form>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; border-bottom:1px solid #ccc; padding:0.5rem;">Document</th>
+                            <th style="text-align:left; border-bottom:1px solid #ccc; padding:0.5rem;">Type</th>
+                            <th style="text-align:right; border-bottom:1px solid #ccc; padding:0.5rem;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentsTableBody">
+                        <tr><td colspan="3" style="padding:0.5rem; text-align:center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="card" id="paymentsModulePlaceholder">
                 <div class="card-header">Payments & Collections</div>
 
@@ -251,6 +292,32 @@ function loadCommissions() {
         });
 }
 
+function loadDocuments() {
+    fetch('/api/documents.php?action=list&entity_type=Booking&entity_id=' + encodeURIComponent(bookingId))
+        .then(r => r.json())
+        .then(res => {
+            const tbody = document.getElementById('documentsTableBody');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if (res.status === 'success' && res.data.length > 0) {
+                res.data.forEach(d => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee;"><strong>${escapeHTML(d.original_filename)}</strong></td>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee;">${escapeHTML(d.category)} - ${escapeHTML(d.document_type)}</td>
+                            <td style="padding:0.5rem; border-bottom:1px solid #eee; text-align:right;">
+                                <a href="/api/documents.php?action=download&id=${d.id}" target="_blank" class="btn btn-outline" style="font-size:0.8rem;">Download</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="padding:0.5rem; text-align:center;">No documents uploaded.</td></tr>';
+            }
+        });
+}
+
 function loadPayments() {
     fetch('/api/payments.php?action=list_for_booking&booking_id=' + encodeURIComponent(bookingId))
         .then(r => r.json())
@@ -277,6 +344,28 @@ function loadPayments() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const docForm = document.getElementById('uploadDocForm');
+    if (docForm) {
+        docForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fd = new FormData(this);
+            const msg = document.getElementById('uploadMsg');
+            fetch('/api/documents.php', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(res => {
+                    if(res.status === 'success') {
+                        msg.style.color = 'green';
+                        msg.textContent = res.message;
+                        this.reset();
+                        loadDocuments();
+                    } else {
+                        msg.style.color = 'red';
+                        msg.textContent = res.message;
+                    }
+                });
+        });
+    }
+
     const commForm = document.getElementById('recordCommissionForm');
     if (commForm) {
         commForm.addEventListener('submit', function(e) {
@@ -348,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBooking();
     loadPayments();
     loadCommissions();
+    loadDocuments();
 });
 </script>
 

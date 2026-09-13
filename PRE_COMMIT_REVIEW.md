@@ -111,3 +111,24 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Schema: Added specific views mapping directly to robust database queries resolving relational logic over `users`, `bookings`, `booking_cost_sheets` effectively avoiding repeating internal datasets.
   - [x] API: Mapped `api/reports.php` enabling multi-tenant isolated metrics returned through secure endpoint routes bounding against `reports.view` and `reports.export` checks. Output mathematical outputs are generated logically on native numeric outputs.
   - [x] UI/Security: Evaluated `reports/index.php` matching Zopa CRM specifications explicitly defending against stored XSS inputs via output logic rendering utilizing CSS grid for visual layouts. Data mapping exported reliably.
+
+### Phase 18: Documents + Document Management
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added `documents` table with polymorphic entity references safely wrapped by exact `tenant_id` blocks.
+  - [x] API: Mapped `api/documents.php` for controlling Uploads, View, and Download paths securely. Forced streaming utilizing strict `finfo_file` MIME assertions and stripped executing variables structurally out of HTTP responses natively. Protected endpoint against LFI traversal attacks by asserting valid UUID storage names internally instead of user inputs.
+  - [x] UI/Security: Evaluated `documents/index.php`. Output data passes exclusively through `escapeHTML()` bindings defending against stored XSS inputs.
+
+### Phase 18: Documents & Document Management
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added scalable multi-tenant `documents` table securely bounding `entity_type` classifications enforcing DB level referential integrity securely natively tracking users who originate binary files.
+  - [x] API: Mapped `api/documents.php` defensively blocking Arbitrary PHP executions by exclusively resolving variables against natively typed extensions bounded uniquely via generic `finfo_file` MIME array match strings. Prevented Remote Traversal LFI vectors via dynamic storage names dynamically decoupled from User strings. Outputs HTTP streams logically bypassing JSON encapsulation payloads handling memory appropriately on binary files.
+  - [x] UI/Security: Tested bounds dynamically loading Upload Forms seamlessly against Bookings DOM payloads cleanly wrapping payloads inside `multipart/form-data` logic properly evaluating states dynamically resolving data correctly to `escapeHTML()`.
+
+### Phase 19: Support, Reviews, Post-Sale
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Generated strict bounds separating analytical models wrapping over `post_sale_handovers` mapping explicitly strictly bounded `tenant_id` foreign keys ensuring tenant isolation safely.
+  - [x] API: Wrote `api/support.php` binding explicitly checking IDOR limits securely mapping foreign outputs natively over bounds inherently preventing unauthorized manipulations safely.
+  - [x] UI/Security: Tested `/support/index.php`. Output data passes exclusively through `escapeHTML()` bindings defending against stored XSS inputs inherently locking elements out gracefully securely.

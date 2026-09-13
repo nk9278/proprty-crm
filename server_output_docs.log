@@ -1,0 +1,58 @@
+[Sun Sep 13 20:55:52 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 20:56:56 2026] [::1]:56566 Accepted
+[Sun Sep 13 20:56:56 2026] [::1]:56566 [200]: GET /auth/login.php
+[Sun Sep 13 20:56:56 2026] [::1]:56566 Closing
+[Sun Sep 13 20:56:57 2026] [::1]:56568 Accepted
+[Sun Sep 13 20:56:57 2026] [::1]:56568 [302]: POST /auth/login.php
+[Sun Sep 13 20:56:57 2026] [::1]:56568 Closing
+[Sun Sep 13 20:56:57 2026] [::1]:56570 Accepted
+[Sun Sep 13 20:56:57 2026] [::1]:56570 [200]: GET /dashboard.php
+[Sun Sep 13 20:56:57 2026] [::1]:56570 Closing
+[Sun Sep 13 20:56:57 2026] [::1]:56572 Accepted
+[Sun Sep 13 20:56:57 2026] [::1]:56572 [403]: GET /api/tasks.php?action=list&status=Pending
+[Sun Sep 13 20:56:57 2026] [::1]:56572 Closing
+[Sun Sep 13 20:56:57 2026] [::1]:56576 Accepted
+[Sun Sep 13 20:56:57 2026] [::1]:56576 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 20:56:57 2026] [::1]:56576 Closing
+[Sun Sep 13 20:56:59 2026] [::1]:49542 Accepted
+[Sun Sep 13 20:56:59 2026] [::1]:49542 [200]: GET /documents/index.php
+[Sun Sep 13 20:56:59 2026] [::1]:49542 Closing
+[Sun Sep 13 20:56:59 2026] [::1]:49544 Accepted
+[Sun Sep 13 20:56:59 2026] [::1]:49544 [200]: GET /api/documents.php?action=list
+[Sun Sep 13 20:56:59 2026] [::1]:49544 Closing
+[Sun Sep 13 20:57:02 2026] [::1]:49546 Accepted
+[Sun Sep 13 20:57:02 2026] [::1]:49546 [200]: GET /bookings/view.php?id=1
+[Sun Sep 13 20:57:02 2026] [::1]:49546 Closing
+[Sun Sep 13 20:57:02 2026] [::1]:49550 Accepted
+[Sun Sep 13 20:57:02 2026] [::1]:49566 Accepted
+[Sun Sep 13 20:57:02 2026] [::1]:49570 Accepted
+[Sun Sep 13 20:57:02 2026] [::1]:49576 Accepted
+[Sun Sep 13 20:57:02 2026] [::1]:49550 [200]: GET /api/bookings.php?action=view&id=1
+[Sun Sep 13 20:57:02 2026] [::1]:49550 Closing
+[Sun Sep 13 20:57:02 2026] [::1]:49566 [200]: GET /api/payments.php?action=list_for_booking&booking_id=1
+[Sun Sep 13 20:57:02 2026] [::1]:49566 Closing
+[Sun Sep 13 20:57:02 2026] [::1]:49570 [200]: GET /api/commissions.php?action=list_for_booking&booking_id=1
+[Sun Sep 13 20:57:02 2026] [::1]:49570 Closing
+[Sun Sep 13 20:57:02 2026] [::1]:49576 [200]: GET /api/documents.php?action=list&entity_type=Booking&entity_id=1
+[Sun Sep 13 20:57:02 2026] [::1]:49576 Closing
+[Sun Sep 13 20:57:04 2026] [::1]:49578 Accepted
+[Sun Sep 13 20:57:04 2026] [::1]:49578 [200]: GET /bookings/view.php?csrf_token=38e688027116eb694e907db6e61f542b732b01fda8883ccd4e513a4cf7311cbd&action=upload&entity_type=Booking&entity_id=1&category=Booking+%2F+Sales&document_type=Booking+Form&document=dummy.pdf
+[Sun Sep 13 20:57:04 2026] [::1]:49578 Closing
+[Sun Sep 13 20:57:04 2026] [::1]:49588 Accepted
+[Sun Sep 13 20:57:04 2026] [::1]:49590 Accepted
+[Sun Sep 13 20:57:04 2026] [::1]:49600 Accepted
+[Sun Sep 13 20:57:04 2026] [::1]:49602 Accepted
+[Sun Sep 13 20:57:04 2026] [::1]:49588 [404]: GET /api/bookings.php?action=view&id=
+[Sun Sep 13 20:57:04 2026] [::1]:49588 Closing
+[Sun Sep 13 20:57:04 2026] [::1]:49590 [200]: GET /api/payments.php?action=list_for_booking&booking_id=
+[Sun Sep 13 20:57:04 2026] [::1]:49590 Closing
+[Sun Sep 13 20:57:04 2026] [::1]:49600 [200]: GET /api/commissions.php?action=list_for_booking&booking_id=
+[Sun Sep 13 20:57:04 2026] [::1]:49600 Closing
+[Sun Sep 13 20:57:04 2026] [::1]:49602 [200]: GET /api/documents.php?action=list&entity_type=Booking&entity_id=
+[Sun Sep 13 20:57:04 2026] [::1]:49602 Closing
+[Sun Sep 13 20:57:06 2026] [::1]:49604 Accepted
+[Sun Sep 13 20:57:06 2026] [::1]:49604 [200]: GET /documents/index.php
+[Sun Sep 13 20:57:06 2026] [::1]:49604 Closing
+[Sun Sep 13 20:57:06 2026] [::1]:49620 Accepted
+[Sun Sep 13 20:57:06 2026] [::1]:49620 [200]: GET /api/documents.php?action=list
+[Sun Sep 13 20:57:06 2026] [::1]:49620 Closing

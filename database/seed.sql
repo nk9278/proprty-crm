@@ -189,3 +189,23 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT 1, id FROM permissions WHERE name LIKE 'reports.%';
+
+-- PHASE 18: DOCUMENTS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('documents.view', 'View/Download Documents'),
+('documents.upload', 'Upload Documents'),
+('documents.manage', 'Archive/Delete Documents');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'documents.%';
+
+-- PHASE 19: SUPPORT + REVIEWS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('support.view', 'View Support Tickets'),
+('support.manage', 'Manage Support Tickets'),
+('reviews.view', 'View Reviews'),
+('reviews.moderate', 'Moderate Customer Reviews'),
+('post_sale.manage', 'Manage Post-Sale Handovers');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'support.%' OR name LIKE 'reviews.%' OR name LIKE 'post_sale.%';

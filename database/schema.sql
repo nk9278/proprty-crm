@@ -884,3 +884,88 @@ CREATE TABLE IF NOT EXISTS webhook_logs (
     error_message TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 18: DOCUMENTS
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS documents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    document_type VARCHAR(100) NOT NULL,
+    original_filename VARCHAR(255) NOT NULL,
+    storage_path VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size INT NOT NULL,
+    entity_type ENUM('Lead', 'Customer', 'Project', 'Property', 'Unit', 'Booking', 'Payment', 'ChannelPartner', 'Commission', 'SiteVisit', 'Other') NOT NULL,
+    entity_id INT NOT NULL,
+    status ENUM('Active', 'Archived', 'Deleted') DEFAULT 'Active',
+    version INT DEFAULT 1,
+    notes TEXT NULL,
+    uploaded_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 19: SUPPORT + REVIEWS + POST-SALE
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS support_tickets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    customer_id INT NULL,
+    booking_id INT NULL,
+    property_id INT NULL,
+    category VARCHAR(100) NOT NULL,
+    priority ENUM('Low', 'Medium', 'High', 'Urgent') DEFAULT 'Medium',
+    status ENUM('Open', 'In Progress', 'Waiting', 'Resolved', 'Closed') DEFAULT 'Open',
+    subject VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    assigned_user_id INT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    target_type ENUM('Property', 'Salesperson', 'Service', 'SiteVisit') NOT NULL,
+    target_id INT NOT NULL,
+    rating INT NOT NULL CHECK(rating >= 1 AND rating <= 5),
+    review_text TEXT NULL,
+    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS post_sale_handovers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    booking_id INT NOT NULL UNIQUE,
+    expected_possession_date DATE NULL,
+    actual_possession_date DATE NULL,
+    handover_date DATE NULL,
+    handover_status ENUM('Pending', 'In Progress', 'Completed') DEFAULT 'Pending',
+    keys_delivered TINYINT(1) DEFAULT 0,
+    documents_delivered TINYINT(1) DEFAULT 0,
+    snagging_list TEXT NULL,
+    customer_confirmation TINYINT(1) DEFAULT 0,
+    notes TEXT NULL,
+    updated_by INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

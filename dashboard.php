@@ -53,6 +53,8 @@ requireLogin();
         <a href="/channel_partners/index.php">Partners</a>
         <a href="/marketing/index.php">Marketing</a>
         <a href="/reports/index.php">Reports</a>
+        <a href="/documents/index.php">Documents</a>
+        <a href="/support/index.php">Support</a>
         <a href="/tasks/index.php">Tasks</a>
         <?php if(hasPermission('Tenant Owner')): ?>
         <a href="/settings/index.php">Settings</a>

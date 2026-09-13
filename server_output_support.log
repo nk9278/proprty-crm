@@ -1,0 +1,28 @@
+[Sun Sep 13 21:03:53 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 21:04:59 2026] [::1]:43092 Accepted
+[Sun Sep 13 21:04:59 2026] [::1]:43092 [200]: GET /auth/login.php
+[Sun Sep 13 21:04:59 2026] [::1]:43092 Closing
+[Sun Sep 13 21:04:59 2026] [::1]:43096 Accepted
+[Sun Sep 13 21:04:59 2026] [::1]:43096 [302]: POST /auth/login.php
+[Sun Sep 13 21:04:59 2026] [::1]:43096 Closing
+[Sun Sep 13 21:04:59 2026] [::1]:43108 Accepted
+[Sun Sep 13 21:04:59 2026] [::1]:43108 [200]: GET /dashboard.php
+[Sun Sep 13 21:04:59 2026] [::1]:43108 Closing
+[Sun Sep 13 21:04:59 2026] [::1]:43114 Accepted
+[Sun Sep 13 21:04:59 2026] [::1]:43124 Accepted
+[Sun Sep 13 21:04:59 2026] [::1]:43114 [403]: GET /api/tasks.php?action=list&status=Pending
+[Sun Sep 13 21:04:59 2026] [::1]:43114 Closing
+[Sun Sep 13 21:04:59 2026] [::1]:43124 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 21:04:59 2026] [::1]:43124 Closing
+[Sun Sep 13 21:05:01 2026] [::1]:43126 Accepted
+[Sun Sep 13 21:05:01 2026] [::1]:43126 [200]: GET /support/index.php
+[Sun Sep 13 21:05:01 2026] [::1]:43126 Closing
+[Sun Sep 13 21:05:01 2026] [::1]:43136 Accepted
+[Sun Sep 13 21:05:01 2026] [::1]:43136 [200]: GET /api/support.php?action=list
+[Sun Sep 13 21:05:01 2026] [::1]:43136 Closing
+[Sun Sep 13 21:05:04 2026] [::1]:43148 Accepted
+[Sun Sep 13 21:05:04 2026] [::1]:43148 [200]: POST /api/support.php
+[Sun Sep 13 21:05:04 2026] [::1]:43148 Closing
+[Sun Sep 13 21:05:04 2026] [::1]:43150 Accepted
+[Sun Sep 13 21:05:04 2026] [::1]:43150 [200]: GET /api/support.php?action=list
+[Sun Sep 13 21:05:04 2026] [::1]:43150 Closing
