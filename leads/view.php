@@ -138,6 +138,13 @@ $csrf_token = generateCsrfToken();
                 <?php if(hasPermission('leads.assign')): ?>
                 <a href="#" class="btn btn-outline" id="action_assign">Assign Lead</a>
                 <?php endif; ?>
+                <?php if(hasPermission('customers.convert')): ?>
+                <form id="convertLeadForm" style="margin: 0; padding: 0;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                    <button type="submit" class="btn btn-outline" style="width: 100%; border-color: green; color: green;" id="btn_convert">Convert to Customer</button>
+                </form>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -301,6 +308,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadLead();
                 } else {
                     alert(res.message);
+                }
+            });
+        });
+    }
+
+    const convertLeadForm = document.getElementById('convertLeadForm');
+    if (convertLeadForm) {
+        convertLeadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to convert this lead to a customer?')) return;
+
+            const btn = document.getElementById('btn_convert');
+            btn.disabled = true;
+            btn.textContent = 'Converting...';
+
+            fetch('/api/leads.php?action=convert', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(r => r.json()).then(res => {
+                if (res.status === 'success') {
+                    window.location.href = '/customers/view.php?id=' + res.customer_id;
+                } else {
+                    alert(res.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Convert to Customer';
                 }
             });
         });

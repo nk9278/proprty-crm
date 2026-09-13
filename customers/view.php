@@ -1,0 +1,166 @@
+<?php
+require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/rbac.php';
+
+requireLogin();
+requirePermission('customers.view');
+
+$customer_id = $_GET['id'] ?? null;
+if (!$customer_id) {
+    die("Customer ID is required.");
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zopa CRM - Customer Profile</title>
+    <style>
+        body { font-family: sans-serif; background-color: #F1EDED; color: #1E1C1C; margin: 0; }
+        .header { background-color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header-actions a { color: #666; text-decoration: none; padding: 0.5rem; font-weight: bold; }
+        .header-actions a:hover { color: #CF1F3C; }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; margin: 1rem auto; }
+        }
+
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        .card-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;}
+
+        .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;}
+        .profile-avatar { width: 60px; height: 60px; background-color: #1E1C1C; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; }
+        .profile-name { font-size: 1.4rem; font-weight: bold; margin: 0;}
+        .profile-meta { color: #666; font-size: 0.9rem; margin-top: 0.25rem;}
+
+        .detail-row { display: flex; margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .detail-label { width: 120px; font-weight: bold; color: #555; }
+        .detail-value { flex: 1; }
+
+        .btn { background-color: #CF1F3C; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;}
+        .btn:hover { background-color: #b01a33; }
+        .btn-outline { background-color: transparent; color: #1E1C1C; border: 1px solid #1E1C1C; }
+        .btn-outline:hover { background-color: #eee; }
+
+        #error_msg { color: #CF1F3C; text-align: center; font-weight: bold; padding: 2rem; display: none; }
+        #loading { text-align: center; padding: 2rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Customer Profile</h1>
+    <div class="header-actions">
+        <a href="/customers/index.php">&larr; Back to Customers</a>
+    </div>
+</div>
+
+<div id="loading">Loading customer data...</div>
+<div id="error_msg"></div>
+
+<div class="container" id="content" style="display: none;">
+    <div>
+        <div class="card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="avatar">C</div>
+                <div>
+                    <h2 class="profile-name" id="cust_name">Name</h2>
+                    <div class="profile-meta" id="cust_meta">Mobile | Email</div>
+                </div>
+            </div>
+
+            <div class="card-header">Details</div>
+            <div class="detail-row">
+                <div class="detail-label">City</div>
+                <div class="detail-value" id="val_city">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Company</div>
+                <div class="detail-value" id="val_company">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Occupation</div>
+                <div class="detail-value" id="val_occupation">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Source</div>
+                <div class="detail-value" id="val_source">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Origin Lead ID</div>
+                <div class="detail-value" id="val_lead_id">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Customer Since</div>
+                <div class="detail-value" id="val_created">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <div class="card-header">Quick Actions</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="#" class="btn btn-outline" onclick="alert('Phase 7 Integration placeholder')">Book Property</a>
+                <a href="#" class="btn btn-outline" onclick="alert('Phase 18 Integration placeholder')">Upload Document</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const custId = <?php echo json_encode($customer_id); ?>;
+
+    fetch('/api/customers.php?action=get&id=' + custId)
+        .then(response => response.json())
+        .then(res => {
+            document.getElementById('loading').style.display = 'none';
+            if (res.status === 'success') {
+                document.getElementById('content').style.display = 'grid';
+                const c = res.data;
+
+                document.getElementById('avatar').textContent = escapeHTML(c.name.charAt(0).toUpperCase());
+                document.getElementById('cust_name').textContent = escapeHTML(c.name);
+                document.getElementById('cust_meta').textContent = `${escapeHTML(c.mobile)} ${c.email ? '| ' + escapeHTML(c.email) : ''}`;
+
+                document.getElementById('val_city').textContent = escapeHTML(c.city) || '-';
+                document.getElementById('val_company').textContent = escapeHTML(c.company) || '-';
+                document.getElementById('val_occupation').textContent = escapeHTML(c.occupation) || '-';
+                document.getElementById('val_source').textContent = escapeHTML(c.source_name) || '-';
+
+                if (c.lead_id) {
+                    document.getElementById('val_lead_id').innerHTML = `<a href="/leads/view.php?id=${escapeHTML(c.lead_id)}">Lead #${escapeHTML(c.lead_id)}</a>`;
+                }
+
+                document.getElementById('val_created').textContent = new Date(c.created_at).toLocaleDateString();
+            } else {
+                const err = document.getElementById('error_msg');
+                err.style.display = 'block';
+                err.textContent = res.message;
+            }
+        })
+        .catch(err => {
+            document.getElementById('loading').style.display = 'none';
+            const errMsg = document.getElementById('error_msg');
+            errMsg.style.display = 'block';
+            errMsg.textContent = 'A network error occurred.';
+        });
+});
+</script>
+
+</body>
+</html>

@@ -104,6 +104,34 @@ CREATE TABLE IF NOT EXISTS lead_statuses (
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    lead_id INT NULL,
+    name VARCHAR(255) NOT NULL,
+    mobile VARCHAR(20) NOT NULL,
+    alternate_mobile VARCHAR(20),
+    whatsapp VARCHAR(20),
+    email VARCHAR(255),
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    address TEXT,
+    occupation VARCHAR(255),
+    company VARCHAR(255),
+    source_id INT,
+    assigned_to INT,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_id) REFERENCES lead_sources(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    -- Note: lead_id FK will be added via ALTER TABLE to avoid circular dependency initially
+);
+
 CREATE TABLE IF NOT EXISTS leads (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,
@@ -142,9 +170,11 @@ CREATE TABLE IF NOT EXISTS leads (
     last_contact TIMESTAMP NULL DEFAULT NULL,
     next_followup TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    customer_id INT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
     FOREIGN KEY (source_id) REFERENCES lead_sources(id) ON DELETE SET NULL,
     FOREIGN KEY (status_id) REFERENCES lead_statuses(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
@@ -253,4 +283,4 @@ CREATE TABLE IF NOT EXISTS lead_tag_map (
     PRIMARY KEY (lead_id, tag_id),
     FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES lead_tags(id) ON DELETE CASCADE
-);
+);ALTER TABLE customers ADD FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL;

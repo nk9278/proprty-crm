@@ -288,6 +288,63 @@ if ($method === 'GET') {
             echo json_encode(['status' => 'error', 'message' => 'Failed to assign lead. It may not exist or you lack permission.']);
         }
 
+    } elseif ($action === 'convert' && isset($_POST['lead_id'])) {
+        requirePermission('customers.convert');
+        $lead_id = (int)$_POST['lead_id'];
+
+        $stmt = $pdo->prepare("SELECT * FROM leads WHERE id = ? AND tenant_id = ? AND customer_id IS NULL AND deleted_at IS NULL LIMIT 1");
+        $stmt->execute([$lead_id, $tenant_id]);
+        $lead = $stmt->fetch();
+
+        if (!$lead) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Lead not found, already converted, or access denied.']);
+            exit();
+        }
+
+        try {
+            $pdo->beginTransaction();
+
+            // Insert into Customers
+            $stmt = $pdo->prepare("
+                INSERT INTO customers (tenant_id, lead_id, name, mobile, alternate_mobile, whatsapp, email, city, state, country, address, source_id, assigned_to, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $tenant_id,
+                $lead_id,
+                $lead['name'],
+                $lead['mobile'],
+                $lead['alternate_mobile'],
+                $lead['whatsapp'],
+                $lead['email'],
+                $lead['city'],
+                $lead['state'],
+                $lead['country'],
+                $lead['address'],
+                $lead['source_id'],
+                $lead['assigned_to'],
+                $user_id
+            ]);
+            $customer_id = $pdo->lastInsertId();
+
+            // Update Lead record with customer_id
+            $stmt = $pdo->prepare("UPDATE leads SET customer_id = ? WHERE id = ?");
+            $stmt->execute([$customer_id, $lead_id]);
+
+            // Log Activity
+            $stmt = $pdo->prepare("INSERT INTO lead_activities (lead_id, user_id, action, new_value) VALUES (?, ?, 'Converted to Customer', ?)");
+            $stmt->execute([$lead_id, $user_id, json_encode(['customer_id' => $customer_id])]);
+
+            $pdo->commit();
+            echo json_encode(['status' => 'success', 'message' => 'Lead converted to customer successfully.', 'customer_id' => $customer_id]);
+        } catch (\Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log("Lead Conversion Error: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'An error occurred during conversion.']);
+        }
+
     } elseif ($action === 'add_followup' && isset($_POST['lead_id'])) {
         requirePermission('leads.edit');
         $lead_id = (int)$_POST['lead_id'];

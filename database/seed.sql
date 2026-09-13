@@ -19,6 +19,11 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 ('properties.create', 'Create Properties'),
 ('properties.edit', 'Edit Properties'),
 ('properties.delete', 'Delete Properties'),
+('customers.view', 'View Customers'),
+('customers.create', 'Create Customers'),
+('customers.edit', 'Edit Customers'),
+('customers.delete', 'Delete Customers'),
+('customers.convert', 'Convert Lead to Customer'),
 ('bookings.view', 'View Bookings'),
 ('bookings.create', 'Create Bookings'),
 ('bookings.cancel', 'Cancel Bookings'),
@@ -33,7 +38,7 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 -- Seed basic role permissions (Example for Salesman)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r, permissions p
-WHERE r.name = 'Salesman' AND p.name IN ('leads.view', 'leads.create', 'leads.edit', 'properties.view', 'bookings.view', 'payments.view');
+WHERE r.name = 'Salesman' AND p.name IN ('leads.view', 'leads.create', 'leads.edit', 'properties.view', 'bookings.view', 'payments.view', 'customers.view', 'customers.convert', 'customers.create', 'customers.edit');
 
 -- Example for Admin (gets everything except what Super Admin gets specifically)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
