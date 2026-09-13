@@ -369,9 +369,11 @@ CREATE TABLE IF NOT EXISTS followup_types (
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS lead_followups (
+CREATE TABLE IF NOT EXISTS followups (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    lead_id INT NOT NULL,
+    tenant_id INT NOT NULL,
+    lead_id INT NULL,
+    customer_id INT NULL,
     user_id INT NOT NULL,
     followup_type_id INT,
     followup_date DATE NOT NULL,
@@ -379,13 +381,57 @@ CREATE TABLE IF NOT EXISTS lead_followups (
     priority ENUM('Low', 'Medium', 'High') DEFAULT 'Medium',
     notes TEXT,
     outcome VARCHAR(255),
-    status ENUM('Pending', 'Completed', 'Overdue', 'Cancelled') DEFAULT 'Pending',
+    status ENUM('Pending', 'Completed', 'Overdue', 'Cancelled', 'Missed', 'Rescheduled') DEFAULT 'Pending',
     next_followup_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
     FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (followup_type_id) REFERENCES followup_types(id) ON DELETE SET NULL,
-    FOREIGN KEY (next_followup_id) REFERENCES lead_followups(id) ON DELETE SET NULL
+    FOREIGN KEY (next_followup_id) REFERENCES followups(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    task_type VARCHAR(100),
+    priority ENUM('Low', 'Medium', 'High', 'Urgent') DEFAULT 'Medium',
+    assigned_user INT NULL,
+    related_lead INT NULL,
+    related_customer INT NULL,
+    related_property INT NULL,
+    related_project INT NULL,
+    due_date DATE NOT NULL,
+    due_time TIME,
+    status ENUM('Pending', 'In Progress', 'Completed', 'Cancelled', 'Overdue') DEFAULT 'Pending',
+    completion_date TIMESTAMP NULL DEFAULT NULL,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_user) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (related_lead) REFERENCES leads(id) ON DELETE CASCADE,
+    FOREIGN KEY (related_customer) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (related_property) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (related_project) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    link VARCHAR(255),
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS lead_notes (
@@ -439,3 +485,40 @@ CREATE TABLE IF NOT EXISTS property_share_items (
     FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
     FOREIGN KEY (unit_id) REFERENCES property_units(id) ON DELETE SET NULL
 );
+
+-- ==========================================================
+-- PHASE 10: SITE VISITS
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS site_visits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    lead_id INT NULL,
+    customer_id INT NULL,
+    project_id INT NULL,
+    property_id INT NULL,
+    unit_id INT NULL,
+    salesperson_id INT NOT NULL,
+    scheduled_date DATE NOT NULL,
+    scheduled_time TIME NOT NULL,
+    visitor_count INT DEFAULT 1,
+    visitor_names VARCHAR(255) NULL,
+    status ENUM('Scheduled', 'Confirmed', 'Rescheduled', 'Completed', 'Cancelled', 'No-Show') DEFAULT 'Scheduled',
+    check_in_time DATETIME NULL,
+    check_out_time DATETIME NULL,
+    feedback TEXT NULL,
+    interest_level ENUM('High', 'Medium', 'Low') NULL,
+    notes TEXT NULL,
+    next_action VARCHAR(255) NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (unit_id) REFERENCES property_units(id) ON DELETE SET NULL,
+    FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

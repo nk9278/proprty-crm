@@ -113,6 +113,13 @@ $csrf_token = generateCsrfToken();
         </div>
 
         <div class="card">
+            <div class="card-header">Tasks</div>
+            <ul class="timeline" id="tasksList">
+                <!-- Tasks will go here -->
+            </ul>
+        </div>
+
+        <div class="card">
             <div class="card-header">Share History</div>
             <ul class="timeline" id="sharesList">
                 <!-- Share history will go here -->
@@ -285,6 +292,29 @@ function loadLead() {
             errMsg.textContent = 'A network error occurred while loading the lead profile.';
         });
 
+    // Fetch Tasks
+    fetch('/api/tasks.php?action=list&status=Pending')
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                const myTasks = res.data.filter(t => t.related_lead == leadId);
+                if (myTasks.length > 0) {
+                    myTasks.forEach(t => {
+                        tasksList.innerHTML += `
+                            <li class="timeline-item">
+                                <span class="timeline-date">Due: ${escapeHTML(t.due_date)}</span>
+                                <strong>${escapeHTML(t.title)}</strong> - ${escapeHTML(t.priority)} Priority
+                            </li>
+                        `;
+                    });
+                } else {
+                    tasksList.innerHTML = '<li class="timeline-item">No pending tasks for this lead.</li>';
+                }
+            }
+        });
+
     // Fetch Shares
     fetch('/api/property-sharing.php?action=history&lead_id=' + leadId)
         .then(response => response.json())
@@ -393,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addFollowupForm) {
         addFollowupForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            fetch('/api/leads.php?action=add_followup', {
+            fetch('/api/followups.php?action=create', {
                 method: 'POST',
                 body: new FormData(this)
             }).then(r => r.json()).then(res => {

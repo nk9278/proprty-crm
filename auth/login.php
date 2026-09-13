@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Please enter mobile number and PIN.';
         } else {
             $pdo = getDB();
-            $stmt = $pdo->prepare("SELECT id, tenant_id, name, pin_hash, role, status FROM users WHERE mobile = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT id, tenant_id, name, pin_hash, role_id, status FROM users WHERE mobile = ? LIMIT 1");
             $stmt->execute([$mobile]);
             $user = $stmt->fetch();
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     session_regenerate_id(true);
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['tenant_id'] = $user['tenant_id'];
-                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['role_id'] = $user['role_id'];
                     $_SESSION['name'] = $user['name'];
 
                     header("Location: /dashboard.php");

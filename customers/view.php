@@ -9,6 +9,7 @@ $customer_id = $_GET['id'] ?? null;
 if (!$customer_id) {
     die("Customer ID is required.");
 }
+$customer_id_safe = htmlspecialchars($customer_id);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -100,6 +101,13 @@ if (!$customer_id) {
         </div>
 
         <div class="card">
+            <div class="card-header">Tasks</div>
+            <ul class="timeline" id="tasksList" style="list-style: none; padding: 0; margin: 0; margin-bottom: 1.5rem;">
+                <!-- Tasks will go here -->
+            </ul>
+        </div>
+
+        <div class="card">
             <div class="card-header">Share History</div>
             <ul class="timeline" id="sharesList" style="list-style: none; padding: 0; margin: 0;">
                 <!-- Share history will go here -->
@@ -113,11 +121,43 @@ if (!$customer_id) {
             <div class="card-header">Quick Actions</div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <?php if(hasPermission('properties.view')): ?>
-                <a href="/leads/match.php?customer_id=<?php echo $customer_id; ?>" class="btn">Find Matching Properties</a>
+                <a href="/leads/match.php?customer_id=<?php echo $customer_id_safe; ?>" class="btn">Find Matching Properties</a>
                 <?php endif; ?>
+                <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
                 <a href="#" class="btn btn-outline" onclick="alert('Phase 7 Integration placeholder')">Book Property</a>
                 <a href="#" class="btn btn-outline" onclick="alert('Phase 18 Integration placeholder')">Upload Document</a>
             </div>
+        </div>
+
+        <!-- Followup form -->
+        <div class="card" id="followupFormCard" style="display:none;">
+            <div class="card-header">Schedule Follow-up</div>
+            <form id="addFollowupForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                <input type="hidden" name="customer_id" value="<?php echo $customer_id_safe; ?>">
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Date *</label><br>
+                    <input type="date" name="followup_date" required style="width:100%; padding:0.5rem;">
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Time</label><br>
+                    <input type="time" name="followup_time" style="width:100%; padding:0.5rem;">
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Priority</label><br>
+                    <select name="priority" style="width:100%; padding:0.5rem;">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Notes</label><br>
+                    <textarea name="notes" style="width:100%; padding:0.5rem;"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width:100%">Save</button>
+            </form>
         </div>
     </div>
 </div>
@@ -177,6 +217,29 @@ document.addEventListener('DOMContentLoaded', () => {
             errMsg.textContent = 'A network error occurred.';
         });
 
+    // Fetch Tasks
+    fetch('/api/tasks.php?action=list&status=Pending')
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                const myTasks = res.data.filter(t => t.related_customer == custId);
+                if (myTasks.length > 0) {
+                    myTasks.forEach(t => {
+                        tasksList.innerHTML += `
+                            <li class="timeline-item">
+                                <span class="timeline-date">Due: ${escapeHTML(t.due_date)}</span>
+                                <strong>${escapeHTML(t.title)}</strong> - ${escapeHTML(t.priority)} Priority
+                            </li>
+                        `;
+                    });
+                } else {
+                    tasksList.innerHTML = '<li class="timeline-item">No pending tasks for this customer.</li>';
+                }
+            }
+        });
+
     // Fetch Shares
     fetch('/api/property-sharing.php?action=history&customer_id=' + custId)
         .then(response => response.json())
@@ -199,6 +262,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Initialize followup events
+        const actionFollowup = document.getElementById('action_followup');
+        if(actionFollowup) {
+            actionFollowup.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('followupFormCard').style.display = 'block';
+            });
+        }
+
+        const addFollowupForm = document.getElementById('addFollowupForm');
+        if (addFollowupForm) {
+            addFollowupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetch('/api/followups.php?action=create', {
+                    method: 'POST',
+                    body: new FormData(this)
+                }).then(r => r.json()).then(res => {
+                    if (res.status === 'success') {
+                        this.reset();
+                        document.getElementById('followupFormCard').style.display = 'none';
+                        alert('Follow-up scheduled.');
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            });
+        }
 });
 </script>
 

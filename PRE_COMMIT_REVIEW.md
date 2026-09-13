@@ -30,3 +30,24 @@
 
 ## Recommended Next Step
 Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matching ecosystem now empowers sales associates to dynamically curate properties and log external communication traces effectively.
+### Phase 9: Follow-ups + Tasks + Notifications
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added tasks and notifications tables, dropped/recreated DB.
+  - [x] API: Built `api/tasks.php`, `api/notifications.php`, and updated `api/followups.php`.
+  - [x] Concurrency: Added pessimistic transactions (`SELECT FOR UPDATE`) on concurrency-critical fields (none in Tasks but prepared structural foundation).
+  - [x] Multi-tenancy/IDOR: Tested that users in Tenant 2 cannot access or edit Tasks from Tenant 1 (received 403 Forbidden).
+  - [x] RBAC: Tested user missing `tasks.view` role successfully restricted. Tested admin insertion of `role_permissions` to resolve.
+  - [x] Notifications: Task assignments correctly triggered notification payloads in MySQL, and `mark_read` endpoints updated `is_read`.
+  - [x] UI/Security: Checked `dashboard.php`, `tasks/index.php`, `notifications/index.php`, which utilize safe JSON responses mapped with custom JS `escapeHTML()`. Included `csrf_token` in all POST endpoints. Tested and confirmed CSRF blocks unauthorized forms.
+- **Test Metrics:** Tested with `curl` on local PHP dev server (`localhost:8000`). Used PHP linter (`php -l`) on 8 core files changed. Zero syntax errors detected.
+
+### Phase 10: Site Visits
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Added `site_visits` table with foreign keys for tenants, leads, customers, projects, properties, and units. Updated `seed.sql` for permissions.
+  - [x] API: Built `api/site-visits.php` handling CRUD, checking in/out, and updating feedback/interest level which also automatically cascades temperature updates back to Leads if applicable.
+  - [x] Multi-tenancy/IDOR: Integrated `current_tenant_id()` strictly.
+  - [x] Concurrency/Locking: Used `SELECT ... FOR UPDATE` when transitioning Site Visit states.
+  - [x] UI: Created `/site_visits/index.php` matching the 2026 SaaS responsive requirements with safe XSS output (`escapeHTML`). Modified Leads and Customers views (`leads/view.php`, `customers/view.php`) to integrate the logic safely (fixed XSS vulnerabilities).
+- **Test Metrics:** Tested with Python Playwright scripts. PHP Syntax tests fully passed.

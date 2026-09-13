@@ -1,0 +1,100 @@
+[Sun Sep 13 14:14:33 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 14:15:54 2026] [::1]:44060 Accepted
+[Sun Sep 13 14:15:54 2026] [::1]:44060 [403]: POST /auth/register.php
+[Sun Sep 13 14:15:54 2026] [::1]:44060 Closing
+[Sun Sep 13 14:17:02 2026] [::1]:46358 Accepted
+[Sun Sep 13 14:17:02 2026] [::1]:46358 [200]: GET /auth/login.php
+[Sun Sep 13 14:17:02 2026] [::1]:46358 Closing
+[Sun Sep 13 14:17:21 2026] [::1]:41794 Accepted
+[Sun Sep 13 14:17:21 2026] [::1]:41794 [403]: POST /auth/login.php
+[Sun Sep 13 14:17:21 2026] [::1]:41794 Closing
+[Sun Sep 13 14:17:39 2026] [::1]:43916 Accepted
+[Sun Sep 13 14:17:39 2026] [::1]:43916 [200]: GET /auth/login.php
+[Sun Sep 13 14:17:39 2026] [::1]:43916 Closing
+[Sun Sep 13 14:17:39 2026] [::1]:43926 Accepted
+[Sun Sep 13 14:17:39 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'role' in 'SELECT' in /app/auth/login.php:26
+Stack trace:
+#0 /app/auth/login.php(26): PDO->prepare()
+#1 {main}
+  thrown in /app/auth/login.php on line 26
+[Sun Sep 13 14:17:39 2026] [::1]:43926 [500]: POST /auth/login.php - Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'role' in 'SELECT' in /app/auth/login.php:26
+Stack trace:
+#0 /app/auth/login.php(26): PDO->prepare()
+#1 {main}
+  thrown in /app/auth/login.php on line 26
+[Sun Sep 13 14:17:39 2026] [::1]:43926 Closing
+[Sun Sep 13 14:18:18 2026] [::1]:52380 Accepted
+[Sun Sep 13 14:18:18 2026] [::1]:52380 [200]: GET /auth/login.php
+[Sun Sep 13 14:18:18 2026] [::1]:52380 Closing
+[Sun Sep 13 14:18:18 2026] [::1]:52382 Accepted
+[Sun Sep 13 14:18:18 2026] [::1]:52382 [302]: POST /auth/login.php
+[Sun Sep 13 14:18:18 2026] [::1]:52382 Closing
+[Sun Sep 13 14:18:36 2026] [::1]:51152 Accepted
+[Sun Sep 13 14:18:36 2026] [::1]:51152 [403]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:18:36 2026] [::1]:51152 Closing
+[Sun Sep 13 14:18:54 2026] [::1]:32868 Accepted
+[Sun Sep 13 14:18:54 2026] [::1]:32868 [403]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:18:54 2026] [::1]:32868 Closing
+[Sun Sep 13 14:19:49 2026] [::1]:59470 Accepted
+[Sun Sep 13 14:19:49 2026] [::1]:59470 [403]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:19:49 2026] [::1]:59470 Closing
+[Sun Sep 13 14:21:00 2026] [::1]:47918 Accepted
+[Sun Sep 13 14:21:00 2026] [::1]:47918 [200]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:21:00 2026] [::1]:47918 Closing
+[Sun Sep 13 14:21:17 2026] [::1]:38386 Accepted
+[Sun Sep 13 14:21:17 2026] [::1]:38386 [200]: GET /tasks/index.php
+[Sun Sep 13 14:21:17 2026] [::1]:38386 Closing
+[Sun Sep 13 14:21:36 2026] [::1]:49748 Accepted
+[Sun Sep 13 14:21:36 2026] [::1]:49748 [200]: GET /tasks/index.php
+[Sun Sep 13 14:21:36 2026] [::1]:49748 Closing
+[Sun Sep 13 14:21:52 2026] [::1]:56654 Accepted
+[Sun Sep 13 14:21:52 2026] [::1]:56654 [200]: GET /tasks/index.php
+[Sun Sep 13 14:21:52 2026] [::1]:56654 Closing
+[Sun Sep 13 14:22:10 2026] [::1]:33796 Accepted
+[Sun Sep 13 14:22:10 2026] [::1]:33796 [200]: GET /tasks/index.php
+[Sun Sep 13 14:22:10 2026] [::1]:33796 Closing
+[Sun Sep 13 14:22:29 2026] [::1]:40984 Accepted
+[Sun Sep 13 14:22:29 2026] [::1]:40984 [400]: POST /api/tasks.php
+[Sun Sep 13 14:22:29 2026] [::1]:40984 Closing
+[Sun Sep 13 14:23:03 2026] [::1]:48836 Accepted
+[Sun Sep 13 14:23:03 2026] [::1]:48836 [200]: POST /api/tasks.php?action=create
+[Sun Sep 13 14:23:03 2026] [::1]:48836 Closing
+[Sun Sep 13 14:23:22 2026] [::1]:56742 Accepted
+[Sun Sep 13 14:23:22 2026] [::1]:56742 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 14:23:22 2026] [::1]:56742 Closing
+[Sun Sep 13 14:24:13 2026] [::1]:54912 Accepted
+[Sun Sep 13 14:24:13 2026] [::1]:54912 [200]: POST /api/tasks.php?action=create
+[Sun Sep 13 14:24:13 2026] [::1]:54912 Closing
+[Sun Sep 13 14:24:48 2026] [::1]:40840 Accepted
+[Sun Sep 13 14:24:48 2026] [::1]:40840 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 14:24:48 2026] [::1]:40840 Closing
+[Sun Sep 13 14:25:06 2026] [::1]:42152 Accepted
+[Sun Sep 13 14:25:06 2026] [::1]:42152 [200]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:25:06 2026] [::1]:42152 Closing
+[Sun Sep 13 14:25:24 2026] [::1]:38510 Accepted
+[Sun Sep 13 14:25:24 2026] [::1]:38510 [200]: POST /api/tasks.php?action=update_status
+[Sun Sep 13 14:25:24 2026] [::1]:38510 Closing
+[Sun Sep 13 14:25:42 2026] [::1]:56394 Accepted
+[Sun Sep 13 14:25:42 2026] [::1]:56394 [200]: GET /api/tasks.php?action=list&status=Completed
+[Sun Sep 13 14:25:42 2026] [::1]:56394 Closing
+[Sun Sep 13 14:26:00 2026] [::1]:40694 Accepted
+[Sun Sep 13 14:26:00 2026] [::1]:40694 [200]: GET /auth/login.php
+[Sun Sep 13 14:26:00 2026] [::1]:40694 Closing
+[Sun Sep 13 14:26:00 2026] [::1]:40710 Accepted
+[Sun Sep 13 14:26:00 2026] [::1]:40710 [302]: POST /auth/login.php
+[Sun Sep 13 14:26:00 2026] [::1]:40710 Closing
+[Sun Sep 13 14:26:21 2026] [::1]:54698 Accepted
+[Sun Sep 13 14:26:21 2026] [::1]:54698 [200]: GET /api/tasks.php?action=list
+[Sun Sep 13 14:26:21 2026] [::1]:54698 Closing
+[Sun Sep 13 14:26:40 2026] [::1]:45270 Accepted
+[Sun Sep 13 14:26:40 2026] [::1]:45270 [404]: POST /api/tasks.php?action=update_status
+[Sun Sep 13 14:26:40 2026] [::1]:45270 Closing
+[Sun Sep 13 14:26:59 2026] [::1]:48348 Accepted
+[Sun Sep 13 14:26:59 2026] [::1]:48348 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 14:26:59 2026] [::1]:48348 Closing
+[Sun Sep 13 14:27:17 2026] [::1]:53018 Accepted
+[Sun Sep 13 14:27:17 2026] [::1]:53018 [200]: POST /api/notifications.php?action=mark_read
+[Sun Sep 13 14:27:17 2026] [::1]:53018 Closing
+[Sun Sep 13 14:27:35 2026] [::1]:43500 Accepted
+[Sun Sep 13 14:27:35 2026] [::1]:43500 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 14:27:35 2026] [::1]:43500 Closing

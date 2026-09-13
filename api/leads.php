@@ -345,42 +345,6 @@ if ($method === 'GET') {
             echo json_encode(['status' => 'error', 'message' => 'An error occurred during conversion.']);
         }
 
-    } elseif ($action === 'add_followup' && isset($_POST['lead_id'])) {
-        requirePermission('leads.edit');
-        $lead_id = (int)$_POST['lead_id'];
-        $followup_type_id = !empty($_POST['followup_type_id']) ? (int)$_POST['followup_type_id'] : null;
-        $followup_date = $_POST['followup_date'] ?? null;
-        $followup_time = !empty($_POST['followup_time']) ? $_POST['followup_time'] : null;
-        $notes = trim($_POST['notes'] ?? '');
-        $priority = !empty($_POST['priority']) ? $_POST['priority'] : 'Medium';
-
-        if (empty($followup_date)) {
-             http_response_code(400);
-             echo json_encode(['status' => 'error', 'message' => 'Follow-up date is required.']);
-             exit();
-        }
-
-        // Verify tenant isolation
-        $stmt = $pdo->prepare("SELECT id FROM leads WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL LIMIT 1");
-        $stmt->execute([$lead_id, $tenant_id]);
-        if (!$stmt->fetch()) {
-             http_response_code(404);
-             echo json_encode(['status' => 'error', 'message' => 'Lead not found.']);
-             exit();
-        }
-
-        $stmt = $pdo->prepare("
-            INSERT INTO lead_followups (lead_id, user_id, followup_type_id, followup_date, followup_time, priority, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([$lead_id, $user_id, $followup_type_id, $followup_date, $followup_time, $priority, $notes]);
-
-        // Log Activity
-        $stmt = $pdo->prepare("INSERT INTO lead_activities (lead_id, user_id, action) VALUES (?, ?, 'Added Follow-up')");
-        $stmt->execute([$lead_id, $user_id]);
-
-        echo json_encode(['status' => 'success', 'message' => 'Follow-up scheduled.']);
-
     } else {
          http_response_code(400);
          echo json_encode(['status' => 'error', 'message' => 'Invalid action for POST method']);

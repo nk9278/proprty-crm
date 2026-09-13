@@ -24,6 +24,10 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 ('customers.edit', 'Edit Customers'),
 ('customers.delete', 'Delete Customers'),
 ('customers.convert', 'Convert Lead to Customer'),
+('tasks.view', 'View Tasks'),
+('tasks.create', 'Create Tasks'),
+('tasks.edit', 'Edit Tasks'),
+('tasks.delete', 'Delete Tasks'),
 ('bookings.view', 'View Bookings'),
 ('bookings.create', 'Create Bookings'),
 ('bookings.cancel', 'Cancel Bookings'),
@@ -38,7 +42,7 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 -- Seed basic role permissions (Example for Salesman)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r, permissions p
-WHERE r.name = 'Salesman' AND p.name IN ('leads.view', 'leads.create', 'leads.edit', 'properties.view', 'bookings.view', 'payments.view', 'customers.view', 'customers.convert', 'customers.create', 'customers.edit');
+WHERE r.name = 'Salesman' AND p.name IN ('leads.view', 'leads.create', 'leads.edit', 'properties.view', 'bookings.view', 'payments.view', 'customers.view', 'customers.convert', 'customers.create', 'customers.edit', 'tasks.view', 'tasks.create', 'tasks.edit');
 
 -- Example for Admin (gets everything except what Super Admin gets specifically)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
@@ -78,3 +82,14 @@ INSERT IGNORE INTO lead_statuses (name) VALUES
 
 INSERT IGNORE INTO followup_types (name) VALUES
 ('Call'), ('WhatsApp'), ('Meeting'), ('Site Visit'), ('Office Visit'), ('Video Call'), ('Email'), ('Payment Follow-up'), ('Document Follow-up'), ('Negotiation'), ('Other');
+
+-- PHASE 10 PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('site_visits.view', 'View Site Visits'),
+('site_visits.create', 'Schedule Site Visits'),
+('site_visits.edit', 'Edit/Manage Site Visits'),
+('site_visits.delete', 'Cancel Site Visits');
+
+-- Assign to Super Admin (Role 1)
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'site_visits.%';
