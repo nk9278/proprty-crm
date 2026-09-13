@@ -1,0 +1,34 @@
+[Sun Sep 13 23:14:28 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 23:16:10 2026] [::1]:43558 Accepted
+[Sun Sep 13 23:16:10 2026] [::1]:43558 [200]: GET /auth/login.php
+[Sun Sep 13 23:16:10 2026] [::1]:43558 Closing
+[Sun Sep 13 23:16:10 2026] [::1]:43574 Accepted
+[Sun Sep 13 23:16:10 2026] [::1]:43574 [302]: POST /auth/login.php
+[Sun Sep 13 23:16:10 2026] [::1]:43574 Closing
+[Sun Sep 13 23:16:10 2026] [::1]:43588 Accepted
+[Sun Sep 13 23:16:10 2026] [::1]:43588 [200]: GET /dashboard.php
+[Sun Sep 13 23:16:10 2026] [::1]:43588 Closing
+[Sun Sep 13 23:16:10 2026] [::1]:43596 Accepted
+[Sun Sep 13 23:16:10 2026] [::1]:43608 Accepted
+[Sun Sep 13 23:16:10 2026] [::1]:43596 [403]: GET /api/tasks.php?action=list&status=Pending
+[Sun Sep 13 23:16:10 2026] [::1]:43596 Closing
+[Sun Sep 13 23:16:10 2026] [::1]:43608 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 23:16:10 2026] [::1]:43608 Closing
+[Sun Sep 13 23:16:12 2026] [::1]:43616 Accepted
+[Sun Sep 13 23:16:12 2026] [::1]:43616 [200]: GET /settings/api_keys.php
+[Sun Sep 13 23:16:12 2026] [::1]:43616 Closing
+[Sun Sep 13 23:16:13 2026] [::1]:43632 Accepted
+[Sun Sep 13 23:16:13 2026] [::1]:43632 [200]: GET /api/api_keys.php?action=list
+[Sun Sep 13 23:16:13 2026] [::1]:43632 Closing
+[Sun Sep 13 23:16:15 2026] [::1]:33604 Accepted
+[Sun Sep 13 23:16:15 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'zopacrm.audit_logs' doesn't exist in /app/api/api_keys.php:46
+Stack trace:
+#0 /app/api/api_keys.php(46): PDO->prepare()
+#1 {main}
+  thrown in /app/api/api_keys.php on line 46
+[Sun Sep 13 23:16:15 2026] [::1]:33604 [500]: POST /api/api_keys.php - Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'zopacrm.audit_logs' doesn't exist in /app/api/api_keys.php:46
+Stack trace:
+#0 /app/api/api_keys.php(46): PDO->prepare()
+#1 {main}
+  thrown in /app/api/api_keys.php on line 46
+[Sun Sep 13 23:16:15 2026] [::1]:33604 Closing

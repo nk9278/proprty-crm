@@ -969,3 +969,97 @@ CREATE TABLE IF NOT EXISTS post_sale_handovers (
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
     FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 20: SAAS PLANS + SUBSCRIPTION ARCHITECTURE
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    plan_code VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    currency VARCHAR(10) DEFAULT 'INR',
+    billing_interval ENUM('Monthly', 'Yearly', 'Custom') DEFAULT 'Monthly',
+    trial_days INT DEFAULT 14,
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS plan_features (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plan_id INT NOT NULL,
+    feature_code VARCHAR(100) NOT NULL,
+    feature_value VARCHAR(255) NULL, -- Can be '1' (enabled), or a limit like '500' or 'Unlimited'
+    FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL UNIQUE,
+    plan_id INT NOT NULL,
+    status ENUM('Trial', 'Active', 'Past Due', 'Suspended', 'Cancelled', 'Expired', 'Pending') DEFAULT 'Trial',
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    trial_ends_at DATE NULL,
+    billing_interval ENUM('Monthly', 'Yearly', 'Custom') NOT NULL,
+    external_subscription_id VARCHAR(255) NULL,
+    cancellation_reason TEXT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS invoices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    subscription_id INT NOT NULL,
+    invoice_number VARCHAR(100) NOT NULL UNIQUE,
+    amount DECIMAL(10,2) NOT NULL,
+    tax DECIMAL(10,2) DEFAULT 0.00,
+    discount DECIMAL(10,2) DEFAULT 0.00,
+    final_amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'INR',
+    status ENUM('Draft', 'Open', 'Paid', 'Void', 'Uncollectible') DEFAULT 'Open',
+    issue_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    payment_reference VARCHAR(255) NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- PHASE 21: EXTERNAL INTEGRATIONS + APIS + WEBHOOKS
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS api_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    api_key VARCHAR(128) NOT NULL UNIQUE,
+    api_secret VARCHAR(128) NOT NULL,
+    status ENUM('Active', 'Revoked', 'Expired') DEFAULT 'Active',
+    last_used_at DATETIME NULL,
+    expires_at DATETIME NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS api_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NULL,
+    api_key_id INT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    method VARCHAR(10) NOT NULL,
+    payload JSON NULL,
+    response_code INT NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

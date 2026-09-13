@@ -209,3 +209,30 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT 1, id FROM permissions WHERE name LIKE 'support.%' OR name LIKE 'reviews.%' OR name LIKE 'post_sale.%';
+
+-- PHASE 20: SUBSCRIPTIONS & PLANS PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('subscriptions.manage', 'Manage Tenant Subscription and Billing'),
+('plans.manage', 'Super Admin: Manage SaaS Plans');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'plans.%';
+-- Note: 'subscriptions.manage' is usually a Tenant Owner permission natively checking bounds via logic.
+
+-- SEED PLANS
+INSERT IGNORE INTO plans (id, name, plan_code, description, price, billing_interval, trial_days) VALUES
+(1, 'Free', 'FREE', 'Basic trial limits', 0.00, 'Monthly', 14),
+(2, 'Professional', 'PRO', 'Full access for growing teams', 4999.00, 'Monthly', 14),
+(3, 'Enterprise', 'ENT', 'Unlimited access and priority support', 14999.00, 'Monthly', 0);
+
+INSERT IGNORE INTO plan_features (plan_id, feature_code, feature_value) VALUES
+(1, 'users_limit', '3'), (1, 'leads_limit', '500'),
+(2, 'users_limit', '25'), (2, 'leads_limit', 'Unlimited'),
+(3, 'users_limit', 'Unlimited'), (3, 'leads_limit', 'Unlimited');
+
+-- PHASE 21: API PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('api_keys.manage', 'Create and Manage API Keys for External Integrations');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'api_keys.%';

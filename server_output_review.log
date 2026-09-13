@@ -1,0 +1,64 @@
+[Sun Sep 13 22:45:20 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 22:46:34 2026] [::1]:44628 Accepted
+[Sun Sep 13 22:46:34 2026] [::1]:44628 [200]: GET /auth/login.php
+[Sun Sep 13 22:46:34 2026] [::1]:44628 Closing
+[Sun Sep 13 22:46:35 2026] [::1]:44640 Accepted
+[Sun Sep 13 22:46:35 2026] [::1]:44640 [302]: POST /auth/login.php
+[Sun Sep 13 22:46:35 2026] [::1]:44640 Closing
+[Sun Sep 13 22:46:35 2026] [::1]:44650 Accepted
+[Sun Sep 13 22:46:35 2026] [::1]:44650 [200]: GET /dashboard.php
+[Sun Sep 13 22:46:35 2026] [::1]:44650 Closing
+[Sun Sep 13 22:46:35 2026] [::1]:44654 Accepted
+[Sun Sep 13 22:46:35 2026] [::1]:44666 Accepted
+[Sun Sep 13 22:46:35 2026] [::1]:44654 [403]: GET /api/tasks.php?action=list&status=Pending
+[Sun Sep 13 22:46:35 2026] [::1]:44654 Closing
+[Sun Sep 13 22:46:35 2026] [::1]:44666 [200]: GET /api/notifications.php?action=list_unread
+[Sun Sep 13 22:46:35 2026] [::1]:44666 Closing
+[Sun Sep 13 22:46:37 2026] [::1]:44674 Accepted
+[Sun Sep 13 22:46:37 2026] [::1]:44674 [200]: GET /reviews/index.php
+[Sun Sep 13 22:46:37 2026] [::1]:44674 Closing
+[Sun Sep 13 22:46:37 2026] [::1]:44680 Accepted
+[Sun Sep 13 22:46:37 2026] [::1]:44680 [200]: GET /api/reviews.php?action=list
+[Sun Sep 13 22:46:37 2026] [::1]:44680 Closing
+[Sun Sep 13 22:46:40 2026] [::1]:44696 Accepted
+[Sun Sep 13 22:46:40 2026] [::1]:44696 [200]: POST /api/reviews.php
+[Sun Sep 13 22:46:40 2026] [::1]:44696 Closing
+[Sun Sep 13 22:46:40 2026] [::1]:44700 Accepted
+[Sun Sep 13 22:46:40 2026] [::1]:44700 [200]: GET /api/reviews.php?action=list
+[Sun Sep 13 22:46:40 2026] [::1]:44700 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44708 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44708 [200]: GET /bookings/view.php?id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44708 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44710 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44712 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44726 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44734 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44736 Accepted
+[Sun Sep 13 22:46:42 2026] [::1]:44710 [200]: GET /api/bookings.php?action=view&id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44710 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44712 [200]: GET /api/payments.php?action=list_for_booking&booking_id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44712 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44726 [200]: GET /api/commissions.php?action=list_for_booking&booking_id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44726 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44734 [200]: GET /api/documents.php?action=list&entity_type=Booking&entity_id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44734 Closing
+[Sun Sep 13 22:46:42 2026] [::1]:44736 [200]: GET /api/post_sale.php?action=view&booking_id=1
+[Sun Sep 13 22:46:42 2026] [::1]:44736 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56420 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56420 [200]: GET /bookings/view.php?csrf_token=e00b73696a4aa0886b6d3bff5ba527986e897f24d450cdc48a2c8a80af3139c8&action=update&booking_id=1&expected_possession_date=2027-01-01&actual_possession_date=&handover_date=&handover_status=Pending&keys_delivered=on&snagging_list=Minor+paint+fix+in+corridor
+[Sun Sep 13 22:46:44 2026] [::1]:56420 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56428 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56436 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56440 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56444 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56448 Accepted
+[Sun Sep 13 22:46:44 2026] [::1]:56428 [404]: GET /api/bookings.php?action=view&id=
+[Sun Sep 13 22:46:44 2026] [::1]:56428 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56436 [200]: GET /api/payments.php?action=list_for_booking&booking_id=
+[Sun Sep 13 22:46:44 2026] [::1]:56436 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56440 [200]: GET /api/commissions.php?action=list_for_booking&booking_id=
+[Sun Sep 13 22:46:44 2026] [::1]:56440 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56444 [200]: GET /api/documents.php?action=list&entity_type=Booking&entity_id=
+[Sun Sep 13 22:46:44 2026] [::1]:56444 Closing
+[Sun Sep 13 22:46:44 2026] [::1]:56448 [200]: GET /api/post_sale.php?action=view&booking_id=
+[Sun Sep 13 22:46:44 2026] [::1]:56448 Closing

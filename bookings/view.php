@@ -191,6 +191,43 @@ function renderBooking(b) {
                 </table>
             </div>
 
+            <div class="card" id="postSaleModule">
+                <div class="card-header">Post-Sale Handover</div>
+                <form id="postSaleForm" style="margin-bottom: 0;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="booking_id" value="<?php echo $id_safe; ?>">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div><label>Expected Possession</label><br><input type="date" name="expected_possession_date" id="ps_exp" style="width:100%; padding:0.5rem; box-sizing:border-box;"></div>
+                        <div><label>Actual Possession</label><br><input type="date" name="actual_possession_date" id="ps_act" style="width:100%; padding:0.5rem; box-sizing:border-box;"></div>
+                        <div><label>Handover Date</label><br><input type="date" name="handover_date" id="ps_hdo" style="width:100%; padding:0.5rem; box-sizing:border-box;"></div>
+                        <div>
+                            <label>Status</label><br>
+                            <select name="handover_status" id="ps_status" style="width:100%; padding:0.5rem; box-sizing:border-box;">
+                                <option value="Pending">Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <label><input type="checkbox" name="keys_delivered" id="ps_keys"> Keys Delivered</label>
+                        <label><input type="checkbox" name="documents_delivered" id="ps_docs"> Documents Delivered</label>
+                        <label><input type="checkbox" name="customer_confirmation" id="ps_conf"> Customer Confirmed</label>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label>Snagging / Punch List</label><br>
+                        <textarea name="snagging_list" id="ps_snag" rows="2" style="width:100%; padding:0.5rem; box-sizing:border-box;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Post-Sale Details</button>
+                    <div id="psMsg" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </form>
+            </div>
+
             <div class="card" id="paymentsModulePlaceholder">
                 <div class="card-header">Payments & Collections</div>
 
@@ -288,6 +325,25 @@ function loadCommissions() {
                 });
             } else {
                 tbody.innerHTML = '<tr><td colspan="3" style="padding:0.5rem; text-align:center;">No commissions allocated yet.</td></tr>';
+            }
+        });
+}
+
+function loadPostSale() {
+    fetch('/api/post_sale.php?action=view&booking_id=' + encodeURIComponent(bookingId))
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success' && res.data) {
+                const ps = res.data;
+                if(ps.expected_possession_date) document.getElementById('ps_exp').value = ps.expected_possession_date;
+                if(ps.actual_possession_date) document.getElementById('ps_act').value = ps.actual_possession_date;
+                if(ps.handover_date) document.getElementById('ps_hdo').value = ps.handover_date;
+                if(ps.handover_status) document.getElementById('ps_status').value = ps.handover_status;
+                if(ps.snagging_list) document.getElementById('ps_snag').value = ps.snagging_list;
+
+                document.getElementById('ps_keys').checked = (ps.keys_delivered == 1);
+                document.getElementById('ps_docs').checked = (ps.documents_delivered == 1);
+                document.getElementById('ps_conf').checked = (ps.customer_confirmation == 1);
             }
         });
 }
@@ -438,6 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPayments();
     loadCommissions();
     loadDocuments();
+    loadPostSale();
 });
 </script>
 

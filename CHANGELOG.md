@@ -37,3 +37,9 @@
 
 ## Phase 19 - Support, Reviews, Post-Sale
 - Generated dynamic schema properties separating metrics mapping native limits explicitly bound across 1-5 ratings structurally mapping IDOR boundaries.
+
+## Phase 20 - SaaS Plans + Subscriptions
+- Bound schema constraints handling explicit plan tracking natively evaluating Subscription states structurally blocking IDOR boundaries dynamically across tenants correctly generating logical invoice states natively resolving transactions directly inside robust REST structures.
+
+## Phase 21 - APIs + Webhooks + External Integrations
+- Separated API management out tracking native structures matching IDOR bounded tokens strictly generating randomized secure cryptographic tokens inherently hashing arrays logically internally. Configured layouts executing securely locally.

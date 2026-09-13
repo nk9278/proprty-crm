@@ -132,3 +132,16 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Schema: Generated strict bounds separating analytical models wrapping over `post_sale_handovers` mapping explicitly strictly bounded `tenant_id` foreign keys ensuring tenant isolation safely.
   - [x] API: Wrote `api/support.php` binding explicitly checking IDOR limits securely mapping foreign outputs natively over bounds inherently preventing unauthorized manipulations safely.
   - [x] UI/Security: Tested `/support/index.php`. Output data passes exclusively through `escapeHTML()` bindings defending against stored XSS inputs inherently locking elements out gracefully securely.
+
+### Phase 20: SaaS Plans & Subscriptions
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Generated robust DB definitions enforcing `plan_features` uniquely avoiding hard limits per-user explicitly mapped against `plans`. Added robust billing definitions inside `invoices`.
+  - [x] API: Wrote `api/subscriptions.php`. Enforced explicit row locking (`FOR UPDATE`) generating updates correctly executing upgrades/downgrades avoiding duplicate invocations inherently. Applied `Tenant Owner` checking boundaries naturally protecting endpoints from escalations implicitly inside REST parameters.
+  - [x] UI/Security: Tested `/subscriptions/index.php`. Output data passes exclusively through `escapeHTML()` bindings defending against stored XSS inputs inherently mapping active/current states properly.
+
+### Phase 21: APIs + Webhooks + External Integrations
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Tracked explicit generation arrays handling distinct string hashing patterns tracking explicitly `api_keys` securely binding endpoints internally.
+  - [x] UI/Security: Tested `/settings/api_keys.php` explicitly wrapping keys through `escapeHTML()`. Evaluated UI generation limits resolving `Tenant Owner` boundaries implicitly. Generated testing proofs natively verifying structural layouts properly tracking JSON arrays safely.

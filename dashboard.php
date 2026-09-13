@@ -57,6 +57,8 @@ requireLogin();
         <a href="/support/index.php">Support</a>
         <a href="/tasks/index.php">Tasks</a>
         <?php if(hasPermission('Tenant Owner')): ?>
+        <a href="/subscriptions/index.php">Billing</a>
+        <a href="/settings/api_keys.php">API Keys</a>
         <a href="/settings/index.php">Settings</a>
         <?php endif; ?>
     </div>
