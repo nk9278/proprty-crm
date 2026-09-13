@@ -11,10 +11,12 @@ function isLoggedIn() {
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 }
 
-function requireLogin() {
-    if (!isLoggedIn()) {
-        header("Location: /auth/login.php");
-        exit();
+if (!function_exists('requireLogin')) {
+    function requireLogin() {
+        if (!isLoggedIn()) {
+            header("Location: /auth/login.php");
+            exit();
+        }
     }
 }
 
