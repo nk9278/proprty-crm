@@ -165,6 +165,18 @@ CREATE TABLE IF NOT EXISTS lead_assignments (
     FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS lead_sla (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    lead_id INT NOT NULL,
+    user_id INT NOT NULL,
+    assigned_time TIMESTAMP NOT NULL,
+    sla_deadline TIMESTAMP NOT NULL,
+    first_response_time TIMESTAMP NULL DEFAULT NULL,
+    status ENUM('Pending', 'Met', 'Breached') DEFAULT 'Pending',
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS lead_assignment_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     lead_id INT NOT NULL,

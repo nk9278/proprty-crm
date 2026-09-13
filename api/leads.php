@@ -104,13 +104,22 @@ if ($method === 'GET') {
             exit();
         }
 
+        $force = isset($_POST['force']) && $_POST['force'] === '1';
+
         // Advanced Duplicate Check inside the tenant
-        $stmt = $pdo->prepare("SELECT id FROM leads WHERE tenant_id = ? AND mobile = ? LIMIT 1");
-        $stmt->execute([$tenant_id, $mobile]);
-        if ($stmt->fetch()) {
-             http_response_code(400);
-             echo json_encode(['status' => 'error', 'message' => 'A lead with this mobile number already exists in your workspace.']);
-             exit();
+        if (!$force) {
+            $stmt = $pdo->prepare("SELECT id FROM leads WHERE tenant_id = ? AND (mobile = ? OR email = ?) AND deleted_at IS NULL LIMIT 1");
+            $stmt->execute([$tenant_id, $mobile, $email ?: 'never_match']);
+            $duplicate = $stmt->fetch();
+            if ($duplicate) {
+                 http_response_code(409); // Conflict
+                 echo json_encode([
+                     'status' => 'duplicate',
+                     'message' => 'A lead with this mobile number or email already exists in your workspace.',
+                     'duplicate_id' => $duplicate['id']
+                 ]);
+                 exit();
+            }
         }
 
         try {
@@ -263,6 +272,21 @@ if ($method === 'GET') {
         $stmt->execute([$lead_id, $tag_id]);
 
         echo json_encode(['status' => 'success', 'message' => 'Tag added successfully.']);
+
+    } elseif ($action === 'assign' && isset($_POST['lead_id']) && isset($_POST['user_id'])) {
+        requirePermission('leads.assign');
+        $lead_id = (int)$_POST['lead_id'];
+        $new_user_id = (int)$_POST['user_id'];
+        $method = $_POST['assignment_method'] ?? 'Manual';
+
+        require_once __DIR__ . '/../includes/leads.php';
+
+        if (assignLead($lead_id, $new_user_id, $method)) {
+            echo json_encode(['status' => 'success', 'message' => 'Lead assigned successfully.']);
+        } else {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to assign lead. It may not exist or you lack permission.']);
+        }
 
     } elseif ($action === 'add_followup' && isset($_POST['lead_id'])) {
         requirePermission('leads.edit');

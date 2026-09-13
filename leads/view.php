@@ -135,7 +135,26 @@ $csrf_token = generateCsrfToken();
                 <?php if(hasPermission('leads.edit')): ?>
                 <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn" id="action_edit">Edit Lead</a>
                 <?php endif; ?>
+                <?php if(hasPermission('leads.assign')): ?>
+                <a href="#" class="btn btn-outline" id="action_assign">Assign Lead</a>
+                <?php endif; ?>
             </div>
+        </div>
+
+        <!-- Assign form -->
+        <div class="card" id="assignFormCard" style="display:none;">
+            <div class="card-header">Assign Lead</div>
+            <form id="assignLeadForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label>User ID</label><br>
+                    <!-- In a real app this would be a user dropdown list -->
+                    <input type="number" name="user_id" required style="width:100%; padding:0.5rem;" placeholder="User ID">
+                </div>
+                <button type="submit" class="btn" style="width:100%">Assign</button>
+            </form>
         </div>
 
         <!-- Followup form -->
@@ -256,7 +275,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('action_followup').addEventListener('click', (e) => {
         e.preventDefault();
         document.getElementById('followupFormCard').style.display = 'block';
+        document.getElementById('assignFormCard').style.display = 'none';
     });
+
+    const actionAssignBtn = document.getElementById('action_assign');
+    if (actionAssignBtn) {
+        actionAssignBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('assignFormCard').style.display = 'block';
+            document.getElementById('followupFormCard').style.display = 'none';
+        });
+    }
+
+    const assignLeadForm = document.getElementById('assignLeadForm');
+    if (assignLeadForm) {
+        assignLeadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/leads.php?action=assign', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(r => r.json()).then(res => {
+                if (res.status === 'success') {
+                    this.reset();
+                    document.getElementById('assignFormCard').style.display = 'none';
+                    loadLead();
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+    }
 
     const addTagForm = document.getElementById('addTagForm');
     if (addTagForm) {

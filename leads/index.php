@@ -55,19 +55,30 @@ requirePermission('leads.view');
 
 <div class="container">
     <div class="card">
-        <div class="filters">
-            <input type="text" id="search" placeholder="Search leads...">
-            <select id="status_filter">
-                <option value="">All Statuses</option>
-                <option value="New">New</option>
-                <option value="Contacted">Contacted</option>
-            </select>
+        <div class="filters" style="justify-content: space-between;">
+            <div style="display:flex; gap: 1rem;">
+                <input type="text" id="search" placeholder="Search leads...">
+                <select id="status_filter">
+                    <option value="">All Statuses</option>
+                    <option value="New">New</option>
+                    <option value="Contacted">Contacted</option>
+                </select>
+            </div>
+
+            <?php if(hasPermission('leads.assign')): ?>
+            <form id="bulkAssignForm" style="display:flex; gap: 0.5rem; align-items:center;">
+                <input type="hidden" name="csrf_token" id="bulk_csrf" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
+                <input type="number" id="bulk_user_id" placeholder="User ID" required style="width:100px;">
+                <button type="button" class="header-actions a" style="border:none; cursor:pointer;" onclick="submitBulkAssign()">Bulk Assign</button>
+            </form>
+            <?php endif; ?>
         </div>
 
         <div style="overflow-x: auto;">
             <table id="leads_table">
                 <thead>
                     <tr>
+                        <th style="width:30px;"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
                         <th>Name</th>
                         <th>Mobile</th>
                         <th class="hide-mobile">Email</th>
@@ -130,6 +141,7 @@ function fetchLeads() {
                 filtered.forEach(lead => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
+                        <td><input type="checkbox" class="lead-chk" value="${escapeHTML(lead.id)}"></td>
                         <td><strong>${escapeHTML(lead.name)}</strong></td>
                         <td>${escapeHTML(lead.mobile)}</td>
                         <td class="hide-mobile">${escapeHTML(lead.email) || '-'}</td>
@@ -143,12 +155,56 @@ function fetchLeads() {
                     tbody.appendChild(tr);
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No leads found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No leads found.</td></tr>';
             }
         })
         .catch(err => {
-            document.getElementById('leads_body').innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading leads.</td></tr>';
+            document.getElementById('leads_body').innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Error loading leads.</td></tr>';
         });
+}
+
+function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('.lead-chk');
+    for(let i=0; i<checkboxes.length; i++) {
+        checkboxes[i].checked = source.checked;
+    }
+}
+
+function submitBulkAssign() {
+    const userId = document.getElementById('bulk_user_id').value;
+    const csrf = document.getElementById('bulk_csrf').value;
+    if(!userId) {
+        alert("Enter a User ID");
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('.lead-chk:checked');
+    if(checkboxes.length === 0) {
+        alert("Select at least one lead");
+        return;
+    }
+
+    let promises = [];
+
+    for(let i=0; i<checkboxes.length; i++) {
+        const formData = new FormData();
+        formData.append('csrf_token', csrf);
+        formData.append('lead_id', checkboxes[i].value);
+        formData.append('user_id', userId);
+        formData.append('assignment_method', 'Manual (Bulk)');
+
+        promises.push(
+            fetch('/api/leads.php?action=assign', {
+                method: 'POST',
+                body: formData
+            }).then(r => r.json())
+        );
+    }
+
+    Promise.all(promises).then(results => {
+        alert("Bulk assignment complete.");
+        fetchLeads();
+    });
 }
 </script>
 

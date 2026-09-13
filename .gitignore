@@ -1,2 +1,3 @@
 php_server.log
 cookie.txt
+get_csrf.php

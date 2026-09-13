@@ -15,6 +15,18 @@ function logLeadActivity($lead_id, $action, $old_value = null, $new_value = null
         $old_value ? json_encode($old_value) : null,
         $new_value ? json_encode($new_value) : null
     ]);
+
+    // SLA Met hook: If an activity represents a response, clear pending SLA
+    $response_actions = ['Added Follow-up', 'Logged Call', 'Sent WhatsApp', 'Updated Lead Details'];
+    if (in_array($action, $response_actions) && $user_id) {
+        // Mark pending SLAs as Met
+        $stmt = $pdo->prepare("
+            UPDATE lead_sla
+            SET status = 'Met', first_response_time = CURRENT_TIMESTAMP
+            WHERE lead_id = ? AND status = 'Pending'
+        ");
+        $stmt->execute([$lead_id]);
+    }
 }
 
 function checkDuplicateLead($mobile, $email = null) {
@@ -43,15 +55,12 @@ function assignLead($lead_id, $new_user_id, $assignment_method = 'Manual') {
     $pdo = getDB();
 
     try {
-        $pdo->beginTransaction();
-
         // Validate lead belongs to tenant and lock it
-        $stmt = $pdo->prepare("SELECT id, assigned_to FROM leads WHERE id = ? AND tenant_id = ? FOR UPDATE");
+        $stmt = $pdo->prepare("SELECT id, assigned_to FROM leads WHERE id = ? AND tenant_id = ?");
         $stmt->execute([$lead_id, $tenant_id]);
         $lead = $stmt->fetch();
 
         if (!$lead) {
-            $pdo->rollBack();
             throw new Exception("Lead not found or unauthorized.");
         }
 
@@ -59,9 +68,12 @@ function assignLead($lead_id, $new_user_id, $assignment_method = 'Manual') {
         $current_user = $_SESSION['user_id'] ?? null;
 
         if ($previous_user_id == $new_user_id) {
-            $pdo->rollBack();
             return true; // Already assigned
         }
+
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("SELECT id, assigned_to FROM leads WHERE id = ? AND tenant_id = ? FOR UPDATE");
+        $stmt->execute([$lead_id, $tenant_id]);
 
         // Update Lead record
         $stmt = $pdo->prepare("UPDATE leads SET assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
@@ -71,13 +83,35 @@ function assignLead($lead_id, $new_user_id, $assignment_method = 'Manual') {
         $stmt = $pdo->prepare("INSERT INTO lead_assignment_history (lead_id, previous_user_id, new_user_id, reassigned_by, assignment_method) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$lead_id, $previous_user_id, $new_user_id, $current_user, $assignment_method]);
 
+        // SLA initialization
+        // Fetch Tenant SLA configuration
+        $stmt = $pdo->prepare("SELECT setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key = 'sla_minutes'");
+        $stmt->execute([$tenant_id]);
+        $sla_setting = $stmt->fetchColumn();
+        $sla_minutes = $sla_setting ? (int)$sla_setting : 0;
+
+        if ($sla_minutes > 0) {
+            // Cancel any pending SLAs for this lead
+            $stmt = $pdo->prepare("UPDATE lead_sla SET status = 'Breached' WHERE lead_id = ? AND status = 'Pending'");
+            $stmt->execute([$lead_id]);
+
+            // Insert new SLA timer
+            $stmt = $pdo->prepare("
+                INSERT INTO lead_sla (lead_id, user_id, assigned_time, sla_deadline)
+                VALUES (?, ?, CURRENT_TIMESTAMP, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE))
+            ");
+            $stmt->execute([$lead_id, $new_user_id, $sla_minutes]);
+        }
+
         // Log Activity
         logLeadActivity($lead_id, 'Assigned Lead', ['assigned_to' => $previous_user_id], ['assigned_to' => $new_user_id]);
 
         $pdo->commit();
         return true;
     } catch (Exception $e) {
-        $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         error_log("Assign Lead Error: " . $e->getMessage());
         return false;
     }
