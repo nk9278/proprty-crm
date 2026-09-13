@@ -262,6 +262,17 @@ CREATE TABLE IF NOT EXISTS customers (
     -- Note: lead_id FK will be added via ALTER TABLE to avoid circular dependency initially
 );
 
+CREATE TABLE IF NOT EXISTS pipeline_stages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    sort_order INT DEFAULT 0,
+    is_system TINYINT(1) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS leads (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,
@@ -294,6 +305,7 @@ CREATE TABLE IF NOT EXISTS leads (
     lead_score INT DEFAULT 0,
     lead_temperature ENUM('Hot', 'Warm', 'Cold') DEFAULT 'Cold',
     status_id INT,
+    pipeline_stage_id INT NULL,
     assigned_team INT,
     assigned_to INT,
     created_by INT,
@@ -308,6 +320,7 @@ CREATE TABLE IF NOT EXISTS leads (
     FOREIGN KEY (source_id) REFERENCES lead_sources(id) ON DELETE SET NULL,
     FOREIGN KEY (status_id) REFERENCES lead_statuses(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (pipeline_stage_id) REFERENCES pipeline_stages(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (property_category_id) REFERENCES property_categories(id) ON DELETE SET NULL,
     FOREIGN KEY (property_type_id) REFERENCES property_types(id) ON DELETE SET NULL,

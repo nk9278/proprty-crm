@@ -9,6 +9,7 @@ $lead_id = $_GET['id'] ?? null;
 if (!$lead_id) {
     die("Lead ID is required.");
 }
+$lead_id_safe = htmlspecialchars($lead_id);
 
 // Ensure the page itself initializes the token safely
 $csrf_token = generateCsrfToken();
@@ -113,6 +114,33 @@ $csrf_token = generateCsrfToken();
         </div>
 
         <div class="card">
+            <div class="card-header">Site Visits</div>
+            <div style="margin-bottom: 1rem;">
+                <form id="scheduleVisitForm">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="lead_id" value="<?php echo $lead_id_safe; ?>">
+                    <input type="hidden" name="action" value="create">
+
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <div><label>Date *</label><br><input type="date" name="scheduled_date" required></div>
+                        <div><label>Time *</label><br><input type="time" name="scheduled_time" required></div>
+                        <div><label>Visitors</label><br><input type="number" name="visitor_count" value="1" min="1" style="width: 60px;"></div>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <label>Notes</label><br>
+                        <input type="text" name="visitor_names" placeholder="Visitor details..." style="width: 100%;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Schedule Visit</button>
+                    <div id="visitMsg" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </form>
+            </div>
+
+            <ul class="timeline" id="siteVisitsList" style="list-style: none; padding: 0; margin: 0; margin-bottom: 1.5rem;">
+                <!-- Site Visits will go here -->
+            </ul>
+        </div>
+
+        <div class="card">
             <div class="card-header">Tasks</div>
             <ul class="timeline" id="tasksList">
                 <!-- Tasks will go here -->
@@ -135,7 +163,7 @@ $csrf_token = generateCsrfToken();
             <?php if(hasPermission('leads.edit')): ?>
             <form id="addTagForm" style="display: flex; gap: 0.5rem;">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id_safe; ?>">
                 <input type="text" name="tag_name" placeholder="New Tag" required style="flex:1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
                 <button type="submit" class="btn">Add</button>
             </form>
@@ -146,7 +174,7 @@ $csrf_token = generateCsrfToken();
             <div class="card-header">Quick Actions</div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <?php if(hasPermission('properties.view')): ?>
-                <a href="/leads/match.php?lead_id=<?php echo $lead_id; ?>" class="btn">Find Matching Properties</a>
+                <a href="/leads/match.php?lead_id=<?php echo $lead_id_safe; ?>" class="btn">Find Matching Properties</a>
                 <?php endif; ?>
                 <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
                 <?php if(hasPermission('leads.edit')): ?>
@@ -158,7 +186,7 @@ $csrf_token = generateCsrfToken();
                 <?php if(hasPermission('customers.convert')): ?>
                 <form id="convertLeadForm" style="margin: 0; padding: 0;">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                    <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                    <input type="hidden" name="lead_id" value="<?php echo $lead_id_safe; ?>">
                     <button type="submit" class="btn btn-outline" style="width: 100%; border-color: green; color: green;" id="btn_convert">Convert to Customer</button>
                 </form>
                 <?php endif; ?>
@@ -170,7 +198,7 @@ $csrf_token = generateCsrfToken();
             <div class="card-header">Assign Lead</div>
             <form id="assignLeadForm">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id_safe; ?>">
 
                 <div style="margin-bottom: 0.5rem;">
                     <label>User ID</label><br>
@@ -186,7 +214,7 @@ $csrf_token = generateCsrfToken();
             <div class="card-header">Schedule Follow-up</div>
             <form id="addFollowupForm">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id_safe; ?>">
 
                 <div style="margin-bottom: 0.5rem;">
                     <label>Date *</label><br>
@@ -314,6 +342,52 @@ function loadLead() {
                 }
             }
         });
+
+    // Fetch Site Visits
+    function loadSiteVisits() {
+        fetch('/api/site-visits.php?action=list&lead_id=' + leadId)
+            .then(response => response.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const svList = document.getElementById('siteVisitsList');
+                    svList.innerHTML = '';
+                    if (res.data.length > 0) {
+                        res.data.forEach(v => {
+                            svList.innerHTML += `
+                                <li class="timeline-item">
+                                    <span class="timeline-date">${escapeHTML(v.scheduled_date)} ${escapeHTML(v.scheduled_time)}</span>
+                                    <strong>Status: ${escapeHTML(v.status)}</strong> - Visitors: ${escapeHTML(v.visitor_count)}<br>
+                                    <small>${escapeHTML(v.visitor_names)}</small>
+                                </li>
+                            `;
+                        });
+                    } else {
+                        svList.innerHTML = '<li class="timeline-item">No site visits scheduled.</li>';
+                    }
+                }
+            });
+    }
+    loadSiteVisits();
+
+    document.getElementById('scheduleVisitForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+        const msg = document.getElementById('visitMsg');
+
+        fetch('/api/site-visits.php', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === 'success') {
+                    msg.style.color = 'green';
+                    msg.textContent = 'Site visit scheduled!';
+                    this.reset();
+                    loadSiteVisits();
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = res.message;
+                }
+            });
+    });
 
     // Fetch Shares
     fetch('/api/property-sharing.php?action=history&lead_id=' + leadId)

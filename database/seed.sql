@@ -93,3 +93,36 @@ INSERT IGNORE INTO permissions (name, description) VALUES
 -- Assign to Super Admin (Role 1)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT 1, id FROM permissions WHERE name LIKE 'site_visits.%';
+
+-- PHASE 11: PIPELINE PERMISSIONS
+INSERT IGNORE INTO permissions (name, description) VALUES
+('pipeline.view', 'View Sales Pipeline'),
+('pipeline.manage', 'Manage Sales Pipeline Stages');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name LIKE 'pipeline.%';
+
+-- Seed default pipeline stages for new tenants via trigger or logic, but for our test tenant 1 and 2:
+INSERT IGNORE INTO pipeline_stages (tenant_id, name, sort_order, is_system) VALUES
+(1, 'New', 1, 1),
+(1, 'Contacted', 2, 1),
+(1, 'Qualified', 3, 1),
+(1, 'Property Matched', 4, 1),
+(1, 'Site Visit', 5, 1),
+(1, 'Negotiation', 6, 1),
+(1, 'Token', 7, 1),
+(1, 'Booking', 8, 1),
+(1, 'Payment', 9, 1),
+(1, 'Agreement', 10, 1),
+(1, 'Closed/Lost', 11, 1),
+(2, 'New', 1, 1),
+(2, 'Contacted', 2, 1),
+(2, 'Qualified', 3, 1),
+(2, 'Property Matched', 4, 1),
+(2, 'Site Visit', 5, 1),
+(2, 'Negotiation', 6, 1),
+(2, 'Token', 7, 1),
+(2, 'Booking', 8, 1),
+(2, 'Payment', 9, 1),
+(2, 'Agreement', 10, 1),
+(2, 'Closed/Lost', 11, 1);

@@ -79,6 +79,26 @@ if ($method === 'GET') {
             die();
         }
 
+        // Verify IDOR (tenant ownership) of lead / customer
+        if ($lead_id) {
+            $stmt = $pdo->prepare("SELECT id FROM leads WHERE id = ? AND tenant_id = ?");
+            $stmt->execute([$lead_id, $tenant_id]);
+            if (!$stmt->fetch()) {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Lead not found or access denied.']);
+                die();
+            }
+        }
+        if ($customer_id) {
+            $stmt = $pdo->prepare("SELECT id FROM customers WHERE id = ? AND tenant_id = ?");
+            $stmt->execute([$customer_id, $tenant_id]);
+            if (!$stmt->fetch()) {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Customer not found or access denied.']);
+                die();
+            }
+        }
+
         $project_id = !empty($_POST['project_id']) ? $_POST['project_id'] : null;
         $property_id = !empty($_POST['property_id']) ? $_POST['property_id'] : null;
         $unit_id = !empty($_POST['unit_id']) ? $_POST['unit_id'] : null;

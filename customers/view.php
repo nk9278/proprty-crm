@@ -101,6 +101,33 @@ $customer_id_safe = htmlspecialchars($customer_id);
         </div>
 
         <div class="card">
+            <div class="card-header">Site Visits</div>
+            <div style="margin-bottom: 1rem;">
+                <form id="scheduleVisitForm">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                    <input type="hidden" name="customer_id" value="<?php echo $customer_id_safe; ?>">
+                    <input type="hidden" name="action" value="create">
+
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <div><label>Date *</label><br><input type="date" name="scheduled_date" required></div>
+                        <div><label>Time *</label><br><input type="time" name="scheduled_time" required></div>
+                        <div><label>Visitors</label><br><input type="number" name="visitor_count" value="1" min="1" style="width: 60px;"></div>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <label>Notes</label><br>
+                        <input type="text" name="visitor_names" placeholder="Visitor details..." style="width: 100%;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Schedule Visit</button>
+                    <div id="visitMsg" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </form>
+            </div>
+
+            <ul class="timeline" id="siteVisitsList" style="list-style: none; padding: 0; margin: 0; margin-bottom: 1.5rem;">
+                <!-- Site Visits will go here -->
+            </ul>
+        </div>
+
+        <div class="card">
             <div class="card-header">Tasks</div>
             <ul class="timeline" id="tasksList" style="list-style: none; padding: 0; margin: 0; margin-bottom: 1.5rem;">
                 <!-- Tasks will go here -->
@@ -239,6 +266,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+    // Fetch Site Visits
+    function loadSiteVisits() {
+        fetch('/api/site-visits.php?action=list&customer_id=' + custId)
+            .then(response => response.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const svList = document.getElementById('siteVisitsList');
+                    svList.innerHTML = '';
+                    if (res.data.length > 0) {
+                        res.data.forEach(v => {
+                            svList.innerHTML += `
+                                <li class="timeline-item">
+                                    <span class="timeline-date">${escapeHTML(v.scheduled_date)} ${escapeHTML(v.scheduled_time)}</span>
+                                    <strong>Status: ${escapeHTML(v.status)}</strong> - Visitors: ${escapeHTML(v.visitor_count)}<br>
+                                    <small>${escapeHTML(v.visitor_names)}</small>
+                                </li>
+                            `;
+                        });
+                    } else {
+                        svList.innerHTML = '<li class="timeline-item">No site visits scheduled.</li>';
+                    }
+                }
+            });
+    }
+    loadSiteVisits();
+
+    document.getElementById('scheduleVisitForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+        const msg = document.getElementById('visitMsg');
+
+        fetch('/api/site-visits.php', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === 'success') {
+                    msg.style.color = 'green';
+                    msg.textContent = 'Site visit scheduled!';
+                    this.reset();
+                    loadSiteVisits();
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = res.message;
+                }
+            });
+    });
 
     // Fetch Shares
     fetch('/api/property-sharing.php?action=history&customer_id=' + custId)

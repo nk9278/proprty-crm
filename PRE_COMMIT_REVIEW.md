@@ -51,3 +51,19 @@ Proceed to **Phase 9**: Follow-ups + Tasks + Notifications. The property matchin
   - [x] Concurrency/Locking: Used `SELECT ... FOR UPDATE` when transitioning Site Visit states.
   - [x] UI: Created `/site_visits/index.php` matching the 2026 SaaS responsive requirements with safe XSS output (`escapeHTML`). Modified Leads and Customers views (`leads/view.php`, `customers/view.php`) to integrate the logic safely (fixed XSS vulnerabilities).
 - **Test Metrics:** Tested with Python Playwright scripts. PHP Syntax tests fully passed.
+
+### Phase 10: Additional Verification and Security Testing
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] IDOR: Re-evaluated `api/site-visits.php`. Verified that passing a foreign `lead_id` or `customer_id` strictly blocks creation if it does not belong to the current `tenant_id`. Added server-side checks.
+  - [x] Concurrency/Locking: Used `SELECT ... FOR UPDATE` when transitioning Site Visit statuses (check in/out).
+  - [x] Integration UI: `customers/view.php` and `leads/view.php` now properly populate site visits inside the timeline.
+
+### Phase 11: Sales Pipeline
+- **Status:** Complete
+- **Verification Completed:**
+  - [x] Schema: Fixed schema insertion order constraints and deployed `pipeline_stages` mappings against `leads.pipeline_stage_id`.
+  - [x] API: Implemented `api/pipeline.php` with grouping logics and validation bounds preventing cross-tenant transitions. Output variables escaped implicitly via JSON outputs.
+  - [x] Security: Strictly implemented `pipeline.manage` and `leads.edit` dependencies for updating stage tracking variables. IDOR tests performed against foreign resources and correctly bounced `404` errors.
+  - [x] UI: Drag-and-drop HTML5 UI written with no external javascript frameworks (e.g. strict Vanilla JS usage per stack specs).
+  - [x] Testing: Verified Kanban layout output via Playwright execution. Appended tracking ID to Dashboard's top bar layout properly.
