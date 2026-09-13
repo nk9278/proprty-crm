@@ -2,13 +2,13 @@
 // We have to mock the session
 $_SESSION = [];
 
-// Temporarily redefine requireLogin for the CLI context
-require_once __DIR__ . '/../includes/session.php';
+// Temporarily redefine requireLogin for the CLI context before session requires
 function requireLogin() {
     // Override the redirect for CLI tests
     return true;
 }
 
+require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/rbac.php';
 

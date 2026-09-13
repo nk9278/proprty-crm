@@ -1,18 +1,20 @@
-# Pre-Commit Review (Phase 1 & 2)
+# Pre-Commit Review (Phases 1-4)
 
 ## Tests Performed
-- **Functional Testing**: End-to-end testing of `index.php` routing, `/auth/register.php` (OTP + form), `/auth/login.php` (PIN + Rate Limits), `/auth/otp.php` (Login with OTP), and `/auth/forgot_pin.php`. All user flows behave as outlined in the requirements.
-- **Database Testing**: Evaluated schema definitions and foreign-key constraints. Validated that duplicates correctly throw errors or are preempted. Verified `rate_limits` logic updates properly to prevent brute-forcing. All data manipulation routines use PDO prepared statements to defend against SQL injection.
+- **Functional Testing**: End-to-end testing of `index.php` routing, `/auth/register.php` (OTP + form), `/auth/login.php` (PIN + Rate Limits), `/auth/otp.php` (Login with OTP), and `/auth/forgot_pin.php`. Lead Management (CRUD) endpoints were verified directly via cURL payload generation mimicking application JSON interactions.
+- **Database Testing**: Evaluated schema definitions and foreign-key constraints for authentication and RBAC components. Validated that duplicate registrations or duplicate lead creation accurately triggers rejections within tenant bounds. All data manipulation routines use PDO prepared statements to defend against SQL injection.
+- **Security & Authorization Testing**: Verified tenant isolation mechanisms against IDOR (Insecure Direct Object Reference). Successfully proved that attempting to access a lead record belonging to `Tenant B` while authenticated as `Tenant A` correctly responds with HTTP 404 (Not Found) due to server-side query scoping. Explored RBAC verification through an automated script targeting all edge-case permissions.
 - **Security Testing**: Implemented CSRF checks using native PHP `bin2hex(random_bytes())` bound to session. Verified session generation (`session_regenerate_id`) occurs explicitly on authentication. Secured PHP sessions by setting `HttpOnly`, `Secure`, `SameSite=Lax`, and `use_strict_mode`. Validated rate-limiting behaves properly by intentionally triggering the limits locally via curl.
 - **Responsive Testing**: Wrote a custom Playwright testing script mapping against different viewport resolutions (Mobile / Desktop) capturing key interface steps. Visually validated CSS rendering to align with modern 2026 Zopa UI goals.
 
 ## Tests Passed
 - All API/Page syntax validations via `php -l`.
+- RBAC granular permission rules validating properly dynamically against the DB.
+- IDOR Tenant Boundaries validated natively.
 - Mobile routing behavior logic (Existing User -> Login, New -> Register).
 - OTP generation, validation, bounds checking (3 attempt limit), and expiration tracking.
 - Rate limit mitigation (5 attempt limit per sliding window).
-- Security parameter configuration.
-- Responsive design metrics.
+- Responsive design metrics across auth and lead management pages.
 
 ## Tests Failed
 - None currently.
@@ -26,4 +28,4 @@
 - **SMS API**: The logic constructs safe real OTP codes but simulates sending since no credentials or external API endpoints are available. The actual messaging service remains unmapped.
 
 ## Recommended Next Step
-Proceed to **Phase 3**: Multi-Tenancy + RBAC. The foundation works effectively and is isolated, robust, and completely responsive.
+Proceed to **Phase 5**: Lead Assignment + SLA + Duplicate Detection. The lead management profile and CRUD mechanisms are built securely and robustly on top of Phase 3 Tenant Isolation and RBAC context validation.

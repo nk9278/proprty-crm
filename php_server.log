@@ -1,0 +1,28 @@
+[Sun Sep 13 08:11:51 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sun Sep 13 08:12:17 2026] [::1]:40760 Accepted
+[Sun Sep 13 08:12:17 2026] [::1]:40760 [200]: GET /login.php
+[Sun Sep 13 08:12:17 2026] [::1]:40760 Closing
+[Sun Sep 13 08:12:33 2026] [::1]:58650 Accepted
+[Sun Sep 13 08:12:33 2026] [::1]:58650 [302]: GET /auth/login.php
+[Sun Sep 13 08:12:33 2026] [::1]:58650 Closing
+[Sun Sep 13 08:12:33 2026] [::1]:58656 Accepted
+[Sun Sep 13 08:12:33 2026] [::1]:58656 [403]: POST /api/leads.php?action=create
+[Sun Sep 13 08:12:33 2026] [::1]:58656 Closing
+[Sun Sep 13 08:13:01 2026] [::1]:56320 Accepted
+[Sun Sep 13 08:13:01 2026] [::1]:56320 [200]: GET /get_csrf.php
+[Sun Sep 13 08:13:01 2026] [::1]:56320 Closing
+[Sun Sep 13 08:13:14 2026] [::1]:47214 Accepted
+[Sun Sep 13 08:13:14 2026] [::1]:47214 [200]: POST /api/leads.php?action=create
+[Sun Sep 13 08:13:14 2026] [::1]:47214 Closing
+[Sun Sep 13 08:13:33 2026] [::1]:45610 Accepted
+[Sun Sep 13 08:13:33 2026] [::1]:45610 [200]: GET /api/leads.php?action=list
+[Sun Sep 13 08:13:33 2026] [::1]:45610 Closing
+[Sun Sep 13 08:13:45 2026] [::1]:54656 Accepted
+[Sun Sep 13 08:13:45 2026] [::1]:54656 [200]: GET /api/leads.php?action=get&id=1
+[Sun Sep 13 08:13:45 2026] [::1]:54656 Closing
+[Sun Sep 13 08:14:47 2026] [::1]:39722 Accepted
+[Sun Sep 13 08:14:47 2026] [::1]:39722 [200]: GET /login.php
+[Sun Sep 13 08:14:47 2026] [::1]:39722 Closing
+[Sun Sep 13 08:15:06 2026] [::1]:34954 Accepted
+[Sun Sep 13 08:15:06 2026] [::1]:34954 [404]: GET /api/leads.php?action=get&id=2
+[Sun Sep 13 08:15:06 2026] [::1]:34954 Closing

@@ -1,0 +1,301 @@
+<?php
+require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/rbac.php';
+
+requireLogin();
+requirePermission('leads.view');
+
+$lead_id = $_GET['id'] ?? null;
+if (!$lead_id) {
+    die("Lead ID is required.");
+}
+
+// Ensure the page itself initializes the token safely
+$csrf_token = generateCsrfToken();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zopa CRM - Lead Profile</title>
+    <style>
+        body { font-family: sans-serif; background-color: #F1EDED; color: #1E1C1C; margin: 0; }
+        .header { background-color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header-actions a { color: #666; text-decoration: none; padding: 0.5rem; font-weight: bold; }
+        .header-actions a:hover { color: #CF1F3C; }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; margin: 1rem auto; }
+        }
+
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        .card-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;}
+
+        .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;}
+        .profile-avatar { width: 60px; height: 60px; background-color: #CF1F3C; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; }
+        .profile-name { font-size: 1.4rem; font-weight: bold; margin: 0;}
+        .profile-meta { color: #666; font-size: 0.9rem; margin-top: 0.25rem;}
+
+        .detail-row { display: flex; margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .detail-label { width: 120px; font-weight: bold; color: #555; }
+        .detail-value { flex: 1; }
+
+        .timeline { list-style: none; padding: 0; margin: 0; }
+        .timeline-item { position: relative; padding-left: 1.5rem; margin-bottom: 1rem; font-size: 0.9rem; border-left: 2px solid #ddd; }
+        .timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background-color: #CF1F3C; border-radius: 50%; }
+        .timeline-date { color: #888; font-size: 0.8rem; display: block; margin-bottom: 0.2rem;}
+
+        .btn { background-color: #CF1F3C; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;}
+        .btn:hover { background-color: #b01a33; }
+        .btn-outline { background-color: transparent; color: #CF1F3C; border: 1px solid #CF1F3C; }
+        .btn-outline:hover { background-color: #fef2f2; }
+
+        #error_msg { color: #CF1F3C; text-align: center; font-weight: bold; padding: 2rem; display: none; }
+        #loading { text-align: center; padding: 2rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Lead Profile</h1>
+    <div class="header-actions">
+        <a href="/leads/index.php">&larr; Back to Leads</a>
+    </div>
+</div>
+
+<div id="loading">Loading lead data...</div>
+<div id="error_msg"></div>
+
+<div class="container" id="content" style="display: none;">
+    <!-- Main Column -->
+    <div>
+        <div class="card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="avatar">L</div>
+                <div>
+                    <h2 class="profile-name" id="lead_name">Name</h2>
+                    <div class="profile-meta" id="lead_meta">Mobile | Email</div>
+                </div>
+            </div>
+
+            <div class="card-header">Details</div>
+            <div class="detail-row">
+                <div class="detail-label">Status</div>
+                <div class="detail-value" id="val_status">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Source</div>
+                <div class="detail-value" id="val_source">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">City</div>
+                <div class="detail-value" id="val_city">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Budget</div>
+                <div class="detail-value" id="val_budget">-</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Requirement</div>
+                <div class="detail-value" id="val_requirement">-</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Follow-ups</div>
+            <ul class="timeline" id="followupsList">
+                <!-- Followups will go here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="card">
+            <div class="card-header">Tags</div>
+            <div id="tagsList" style="margin-bottom: 1rem;"></div>
+            <?php if(hasPermission('leads.edit')): ?>
+            <form id="addTagForm" style="display: flex; gap: 0.5rem;">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+                <input type="text" name="tag_name" placeholder="New Tag" required style="flex:1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                <button type="submit" class="btn">Add</button>
+            </form>
+            <?php endif; ?>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Quick Actions</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="#" class="btn btn-outline" id="action_followup">Add Follow-up</a>
+                <?php if(hasPermission('leads.edit')): ?>
+                <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn" id="action_edit">Edit Lead</a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Followup form -->
+        <div class="card" id="followupFormCard" style="display:none;">
+            <div class="card-header">Schedule Follow-up</div>
+            <form id="addFollowupForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Date *</label><br>
+                    <input type="date" name="followup_date" required style="width:100%; padding:0.5rem;">
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Time</label><br>
+                    <input type="time" name="followup_time" style="width:100%; padding:0.5rem;">
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Priority</label><br>
+                    <select name="priority" style="width:100%; padding:0.5rem;">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <label>Notes</label><br>
+                    <textarea name="notes" style="width:100%; padding:0.5rem;"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width:100%">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function loadLead() {
+    const leadId = <?php echo json_encode($lead_id); ?>;
+
+    fetch('/api/leads.php?action=get&id=' + leadId)
+        .then(response => response.json())
+        .then(res => {
+            document.getElementById('loading').style.display = 'none';
+            if (res.status === 'success') {
+                document.getElementById('content').style.display = 'grid';
+                const lead = res.data;
+
+                document.getElementById('avatar').textContent = escapeHTML(lead.name.charAt(0).toUpperCase());
+                document.getElementById('lead_name').textContent = escapeHTML(lead.name);
+                document.getElementById('lead_meta').textContent = `${escapeHTML(lead.mobile)} ${lead.email ? '| ' + escapeHTML(lead.email) : ''}`;
+
+                document.getElementById('val_status').textContent = escapeHTML(lead.status_name) || 'Unassigned';
+                document.getElementById('val_source').textContent = escapeHTML(lead.source_name) || '-';
+                document.getElementById('val_city').textContent = escapeHTML(lead.city) || '-';
+
+                let budget = '';
+                if(lead.budget_min) budget += escapeHTML(lead.budget_min);
+                if(lead.budget_min && lead.budget_max) budget += ' - ';
+                if(lead.budget_max) budget += escapeHTML(lead.budget_max);
+                document.getElementById('val_budget').textContent = budget || '-';
+
+                document.getElementById('val_requirement').textContent = escapeHTML(lead.requirement) || '-';
+
+                // Tags
+                const tagsList = document.getElementById('tagsList');
+                tagsList.innerHTML = '';
+                if (lead.tags && lead.tags.length > 0) {
+                    lead.tags.forEach(tag => {
+                        tagsList.innerHTML += `<span style="display:inline-block; background:${escapeHTML(tag.color)}; color:#333; padding:2px 8px; border-radius:12px; font-size:0.8rem; margin-right:4px; margin-bottom:4px;">${escapeHTML(tag.name)}</span>`;
+                    });
+                } else {
+                    tagsList.innerHTML = '<span style="color:#999; font-size:0.9rem;">No tags</span>';
+                }
+
+                // Followups
+                const followupsList = document.getElementById('followupsList');
+                followupsList.innerHTML = '';
+                if (lead.followups && lead.followups.length > 0) {
+                    lead.followups.forEach(f => {
+                        followupsList.innerHTML += `
+                            <li class="timeline-item">
+                                <span class="timeline-date">${escapeHTML(f.followup_date)} ${escapeHTML(f.followup_time || '')} | ${escapeHTML(f.status)}</span>
+                                <strong>${escapeHTML(f.type_name || 'Follow-up')}</strong> - ${escapeHTML(f.notes)}
+                            </li>
+                        `;
+                    });
+                } else {
+                    followupsList.innerHTML = '<li class="timeline-item">No follow-ups scheduled.</li>';
+                }
+
+            } else {
+                const err = document.getElementById('error_msg');
+                err.style.display = 'block';
+                err.textContent = res.message;
+            }
+        })
+        .catch(err => {
+            document.getElementById('loading').style.display = 'none';
+            const errMsg = document.getElementById('error_msg');
+            errMsg.style.display = 'block';
+            errMsg.textContent = 'A network error occurred while loading the lead profile.';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadLead();
+
+    document.getElementById('action_followup').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('followupFormCard').style.display = 'block';
+    });
+
+    const addTagForm = document.getElementById('addTagForm');
+    if (addTagForm) {
+        addTagForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/leads.php?action=add_tag', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(r => r.json()).then(res => {
+                if (res.status === 'success') {
+                    this.reset();
+                    loadLead();
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+    }
+
+    const addFollowupForm = document.getElementById('addFollowupForm');
+    if (addFollowupForm) {
+        addFollowupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/leads.php?action=add_followup', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(r => r.json()).then(res => {
+                if (res.status === 'success') {
+                    this.reset();
+                    document.getElementById('followupFormCard').style.display = 'none';
+                    loadLead();
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+    }
+});
+</script>
+
+</body>
+</html>

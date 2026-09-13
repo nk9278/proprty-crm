@@ -90,11 +90,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$company]);
                     $tenant_id = $pdo->lastInsertId();
 
+                    // Get Role ID for Tenant Owner
+                    $stmt = $pdo->prepare("SELECT id FROM roles WHERE name = 'Tenant Owner' LIMIT 1");
+                    $stmt->execute();
+                    $role_id = $stmt->fetchColumn();
+
+                    if (!$role_id) {
+                        throw new \Exception("Role 'Tenant Owner' not found in database.");
+                    }
+
                     // Create User (Tenant Owner)
                     $pin_hash = password_hash($pin, PASSWORD_DEFAULT);
-                    $stmt = $pdo->prepare("INSERT INTO users (tenant_id, name, mobile, email, pin_hash, role, status) VALUES (?, ?, ?, ?, ?, 'Tenant Owner', 'Active')");
-                    $stmt->execute([$tenant_id, $name, $reg_mobile, $email, $pin_hash]);
+                    $stmt = $pdo->prepare("INSERT INTO users (tenant_id, name, mobile, email, pin_hash, role_id, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')");
+                    $stmt->execute([$tenant_id, $name, $reg_mobile, $email, $pin_hash, $role_id]);
                     $user_id = $pdo->lastInsertId();
+
+                    // Assign to user_roles
+                    $stmt = $pdo->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
+                    $stmt->execute([$user_id, $role_id]);
 
                     $pdo->commit();
 
@@ -106,7 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     session_regenerate_id(true);
                     $_SESSION['user_id'] = $user_id;
                     $_SESSION['tenant_id'] = $tenant_id;
-                    $_SESSION['role'] = 'Tenant Owner';
+                    $_SESSION['role_id'] = $role_id;
+                    $_SESSION['role_name'] = 'Tenant Owner';
                     $_SESSION['name'] = $name;
 
                     header("Location: /dashboard.php");

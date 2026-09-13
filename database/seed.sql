@@ -60,3 +60,6 @@ INSERT IGNORE INTO lead_sources (name) VALUES
 
 INSERT IGNORE INTO lead_statuses (name) VALUES
 ('New'), ('Unassigned'), ('Assigned'), ('Contact Pending'), ('Called'), ('Connected'), ('Interested'), ('Site Visit Planned'), ('Site Visit Completed'), ('Negotiation'), ('Token Received'), ('Booked'), ('Sold'), ('Lost');
+
+INSERT IGNORE INTO followup_types (name) VALUES
+('Call'), ('WhatsApp'), ('Meeting'), ('Site Visit'), ('Office Visit'), ('Video Call'), ('Email'), ('Payment Follow-up'), ('Document Follow-up'), ('Negotiation'), ('Other');
