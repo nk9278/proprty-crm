@@ -48,6 +48,16 @@ WHERE r.name = 'Admin';
 INSERT IGNORE INTO property_categories (name) VALUES
 ('Residential'), ('Commercial'), ('Land'), ('Plot'), ('Rental'), ('Lease'), ('Resale'), ('Investment'), ('Other');
 
+INSERT IGNORE INTO property_facing (name) VALUES
+('East'), ('West'), ('North'), ('South'), ('North-East'), ('North-West'), ('South-East'), ('South-West');
+
+INSERT IGNORE INTO amenities (name) VALUES
+('Swimming Pool'), ('Gym'), ('Club House'), ('Garden'), ('Park'), ('Security'), ('CCTV'), ('Lift'), ('Power Backup'), ('Parking'),
+('Visitor Parking'), ('Kids Play Area'), ('Jogging Track'), ('Sports Area'), ('Community Hall'), ('Party Hall'), ('Indoor Games'),
+('Outdoor Games'), ('Temple'), ('EV Charging'), ('Fire Safety'), ('Water Supply'), ('Gated Security'), ('Intercom'),
+('Security Guard'), ('Rainwater Harvesting'), ('Solar Power'), ('Sewage Treatment Plant'), ('Visitor Management'),
+('Cafeteria'), ('Rooftop Garden');
+
 INSERT IGNORE INTO property_types (category_id, name) VALUES
 ((SELECT id FROM property_categories WHERE name='Residential'), 'Studio Apartment'),
 ((SELECT id FROM property_categories WHERE name='Residential'), '1 BHK Flat'),

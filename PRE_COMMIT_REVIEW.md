@@ -1,9 +1,9 @@
-# Pre-Commit Review (Phases 1-5)
+# Pre-Commit Review (Phases 1-7)
 
 ## Tests Performed
-- **Functional Testing**: End-to-end testing of authentication routing (`index.php`), OTP login/registration, forgot PIN flows, and Phase 4 Lead Management CRUD flows. Tested the new Phase 5 mechanisms: duplicate soft-blocking via `force` overrides, Lead Assignment UI flows (`settings/index.php`), and automated SLA timing logic triggers.
-- **Database Testing**: Evaluated new schema definitions (`lead_sla`, `lead_assignments`, `lead_assignment_history`). Validated that duplicate creation soft-blocks successfully within tenant boundaries. Ensured that SLA calculations persist correctly into `lead_sla` with valid datetime ranges based on `tenant_settings`.
-- **Security & Authorization Testing**: Extended the IDOR tests to ensure a user belonging to `Tenant B` cannot arbitrarily assign or overwrite SLA hooks on a Lead belonging to `Tenant A`. Successfully verified a strict 400 rejection in this context. Verified RBAC permissions for assigning leads and configuring settings.
+- **Functional Testing**: End-to-end testing of authentication routing, Lead and Customer Management CRUD flows, SLA/Duplicate detection logic, and the new Phase 7 Property and Inventory components. Tested dynamic category->type form filters via UI verification (`properties/create.php`). Simulated placing an inventory unit on hold through the API.
+- **Database Testing**: Evaluated complete relational schema bindings integrating `projects`, `towers`, `floors`, `properties`, and `property_units`. Monitored transactional rollbacks checking for double-booking concurrency traps successfully mitigated utilizing explicit `SELECT ... FOR UPDATE` isolation.
+- **Security & Authorization Testing**: Verified tenant boundaries cross-site by invoking raw IDOR deletion scripts mimicking a malicious tenant operating across properties. Successfully evaluated native server-side isolation mappings. Verified escaping models preventing Cross-Site Scripting (XSS) across dynamic inventory lists.
 - **Security Testing**: Implemented CSRF checks using native PHP `bin2hex(random_bytes())` bound to session. Verified session generation (`session_regenerate_id`) occurs explicitly on authentication. Secured PHP sessions by setting `HttpOnly`, `Secure`, `SameSite=Lax`, and `use_strict_mode`. Validated rate-limiting behaves properly by intentionally triggering the limits locally via curl.
 - **Responsive Testing**: Wrote a custom Playwright testing script mapping against different viewport resolutions (Mobile / Desktop) capturing key interface steps. Visually validated CSS rendering to align with modern 2026 Zopa UI goals.
 
@@ -14,17 +14,19 @@
 - Mobile routing behavior logic.
 - Phase 5 Duplicate Soft-Blocking and Merge/Force mechanisms.
 - SLA dynamic tracking initialization on assignment and status progression upon activity.
-- Responsive design metrics across auth, leads, and settings pages.
+- Phase 6 bi-directional linkage transferring mapped leads over to unified customer definitions efficiently.
+- Phase 7 hierarchical constraint mapping isolating availability hooks efficiently per specific property units independently.
+- Responsive design metrics across auth, leads, customers, settings, and properties pages.
 
 ## Tests Failed
 - None currently.
 
 ## Bugs Found & Fixed
-- Attempting to force an early exception inside `assignLead` threw a PHP fatal error regarding "no active transaction". *Fix: Handled rollback explicitly checking `$pdo->inTransaction()` preventing untrapped rollbacks.*
-- Removed duplicate JavaScript redeclarations rendering strict-mode DOM unparseable on profile view.
+- Missing `customers` creation table was omitted from an overarching plan causing temporary fatal errors when inserting conversion mappings. *Fix: Implemented ALTER TABLE constraints circumventing schema build dependency loops.*
+- Identified a logic regression with assignment mappings inside unstarted transactions during soft duplicate blocking. *Fix: Mitigated by testing connection states prior to manual aborts.*
 
 ## Known Limitations / External Dependencies
 - **SMS API**: The logic constructs safe real OTP codes but simulates sending since no credentials or external API endpoints are available.
 
 ## Recommended Next Step
-Proceed to **Phase 6**: Customers. Phase 5 functionality allows leads to safely pass through duplicate screening, SLA tracking, and ownership reassignment autonomously.
+Proceed to future phases (e.g. Phase 8: Site Visits or Phase 9: Sales Pipeline) utilizing the foundational multi-tenant property hierarchies.

@@ -94,6 +94,136 @@ CREATE TABLE IF NOT EXISTS bhk_types (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS property_facing (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS amenities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    developer VARCHAR(255),
+    rera_number VARCHAR(100),
+    rera_authority VARCHAR(100),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    pincode VARCHAR(20),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    construction_status VARCHAR(100),
+    possession_date DATE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS project_towers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    total_floors INT,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    UNIQUE(project_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS project_floors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tower_id INT NOT NULL,
+    floor_number VARCHAR(50) NOT NULL,
+    FOREIGN KEY (tower_id) REFERENCES project_towers(id) ON DELETE CASCADE,
+    UNIQUE(tower_id, floor_number)
+);
+
+CREATE TABLE IF NOT EXISTS properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    project_id INT NULL,
+    category_id INT NOT NULL,
+    type_id INT NOT NULL,
+    bhk_id INT NULL,
+    facing_id INT NULL,
+    name VARCHAR(255) NOT NULL,
+    purpose ENUM('For Sale', 'For Rent', 'For Lease', 'For Resale', 'For Investment', 'Joint Venture', 'Auction') NOT NULL,
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    pincode VARCHAR(20),
+    carpet_area DECIMAL(10, 2),
+    builtup_area DECIMAL(10, 2),
+    super_builtup_area DECIMAL(10, 2),
+    plot_area DECIMAL(10, 2),
+    base_price DECIMAL(15, 2),
+    description TEXT,
+    status ENUM('Available', 'Hold', 'Blocked', 'Token Received', 'Booked', 'Sold', 'Cancelled', 'Released', 'Archived') DEFAULT 'Available',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES property_categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (type_id) REFERENCES property_types(id) ON DELETE CASCADE,
+    FOREIGN KEY (bhk_id) REFERENCES bhk_types(id) ON DELETE SET NULL,
+    FOREIGN KEY (facing_id) REFERENCES property_facing(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS property_units (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NOT NULL,
+    floor_id INT NULL,
+    unit_number VARCHAR(100) NOT NULL,
+    carpet_area DECIMAL(10, 2),
+    base_price DECIMAL(15, 2),
+    plc DECIMAL(15, 2) DEFAULT 0,
+    floor_rise DECIMAL(15, 2) DEFAULT 0,
+    parking_charge DECIMAL(15, 2) DEFAULT 0,
+    maintenance DECIMAL(15, 2) DEFAULT 0,
+    other_charges DECIMAL(15, 2) DEFAULT 0,
+    gst DECIMAL(15, 2) DEFAULT 0,
+    discount DECIMAL(15, 2) DEFAULT 0,
+    final_price DECIMAL(15, 2) DEFAULT 0,
+    status ENUM('Available', 'Hold', 'Blocked', 'Token Received', 'Booked', 'Sold', 'Cancelled', 'Released') DEFAULT 'Available',
+    hold_expires_at TIMESTAMP NULL DEFAULT NULL,
+    held_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (floor_id) REFERENCES project_floors(id) ON DELETE SET NULL,
+    FOREIGN KEY (held_by) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE(property_id, floor_id, unit_number)
+);
+
+CREATE TABLE IF NOT EXISTS property_amenity_map (
+    property_id INT NOT NULL,
+    amenity_id INT NOT NULL,
+    PRIMARY KEY (property_id, amenity_id),
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS property_media (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NOT NULL,
+    media_type ENUM('Image', 'Video', 'Floor Plan', 'Brochure', 'Document') NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100),
+    is_primary BOOLEAN DEFAULT FALSE,
+    uploaded_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS lead_sources (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
