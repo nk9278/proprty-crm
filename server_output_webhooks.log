@@ -1,7 +1,0 @@
-[Mon Sep 14 03:34:16 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
-[Mon Sep 14 03:35:21 2026] [::1]:59676 Accepted
-[Mon Sep 14 03:35:21 2026] [::1]:59676 [200]: POST /api/webhooks.php?provider=LeadPortal&tenant_key=zk_1234567890abcdef
-[Mon Sep 14 03:35:21 2026] [::1]:59676 Closing
-[Mon Sep 14 03:36:04 2026] [::1]:55816 Accepted
-[Mon Sep 14 03:36:04 2026] [::1]:55816 [200]: POST /api/webhooks.php?provider=LeadPortal&tenant_key=zk_1234567890abcdef
-[Mon Sep 14 03:36:04 2026] [::1]:55816 Closing

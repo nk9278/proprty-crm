@@ -181,7 +181,7 @@ $csrf_token = generateCsrfToken();
                 <a href="#" class="btn btn-outline" onclick="sendWhatsApp()">Send WhatsApp</a>
                 <?php endif; ?>
                 <?php if(hasPermission('leads.edit')): ?>
-                <a href="/leads/edit.php?id=<?php echo $lead_id; ?>" class="btn btn-outline" id="action_edit">Edit Lead</a>
+                <a href="/leads/edit.php?id=<?php echo $lead_id_safe; ?>" class="btn btn-outline" id="action_edit">Edit Lead</a>
                 <?php endif; ?>
                 <?php if(hasPermission('leads.assign')): ?>
                 <a href="#" class="btn btn-outline" id="action_assign">Assign Lead</a>
