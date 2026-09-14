@@ -39,12 +39,28 @@ if ($method === 'GET') {
         $secret = bin2hex(random_bytes(32));
         $expires = date('Y-m-d H:i:s', strtotime('+1 year')); // Configurable naturally later
 
-        $stmt = $pdo->prepare("INSERT INTO api_keys (tenant_id, user_id, name, api_key, api_secret, expires_at) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$tenant_id, $user_id, $name, $key, password_hash($secret, PASSWORD_DEFAULT), $expires]);
+        try {
+            $pdo->beginTransaction();
 
-        // Audit
-        $stmtAudit = $pdo->prepare("INSERT INTO audit_logs (tenant_id, user_id, action, entity, entity_id, ip_address) VALUES (?, ?, 'create_api_key', 'api_keys', ?, ?)");
-        $stmtAudit->execute([$tenant_id, $user_id, $pdo->lastInsertId(), $_SERVER['REMOTE_ADDR'] ?? '']);
+            $stmt = $pdo->prepare("INSERT INTO api_keys (tenant_id, user_id, name, api_key, api_secret, expires_at) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$tenant_id, $user_id, $name, $key, password_hash($secret, PASSWORD_DEFAULT), $expires]);
+            $key_id = $pdo->lastInsertId();
+
+            // Generate Scopes statically for Phase 21 constraints (e.g. read/write mapping safely natively)
+            // In a fuller implementation, scopes would be selected via checkboxes on UI
+            $stmtScope = $pdo->prepare("INSERT INTO api_key_scopes (api_key_id, scope) VALUES (?, ?), (?, ?)");
+            $stmtScope->execute([$key_id, 'leads:read', $key_id, 'leads:create']);
+
+            // Audit
+            $stmtAudit = $pdo->prepare("INSERT INTO audit_logs (tenant_id, user_id, action, entity, entity_id, ip_address) VALUES (?, ?, 'create_api_key', 'api_keys', ?, ?)");
+            $stmtAudit->execute([$tenant_id, $user_id, $key_id, $_SERVER['REMOTE_ADDR'] ?? '']);
+
+            $pdo->commit();
+        } catch (\Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            http_response_code(500);
+            die(json_encode(['status' => 'error', 'message' => 'Failed to allocate API scopes cleanly.']));
+        }
 
         echo json_encode([
             'status' => 'success',

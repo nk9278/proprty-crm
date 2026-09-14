@@ -83,6 +83,14 @@ $csrf_token = generateCsrfToken();
             </tbody>
         </table>
     </div>
+
+    <div class="card">
+        <div class="card-header">Webhook Integration Endpoints</div>
+        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <strong>Ingestion URL:</strong> <code style="word-break: break-all;">https://crm.yourdomain.com/api/webhooks.php?provider=LeadPortal&tenant_key=[YOUR_API_KEY]</code>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">Use your explicit generated API Key as the tenant binding string for webhook validations preventing missing tenant boundaries organically. Events passing deduplication will actively write into CRM logic schemas cleanly.</p>
+        </div>
+    </div>
 </div>
 
 <script>

@@ -1063,3 +1063,26 @@ CREATE TABLE IF NOT EXISTS api_logs (
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Expand API Key logic with Scopes enabling exact permission blocks statically assigned rather than global.
+CREATE TABLE IF NOT EXISTS api_key_scopes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    api_key_id INT NOT NULL,
+    scope VARCHAR(100) NOT NULL,
+    FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_key_scope (api_key_id, scope)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Enhanced Webhook processing structures
+ALTER TABLE webhook_logs ADD COLUMN payload_hash VARCHAR(64) NULL AFTER payload;
+
+-- ==========================================================
+-- PHASE 22: ADVANCED SECURITY & PERFORMANCE INDEXES
+-- ==========================================================
+-- Optimizing core entity access patterns matching `tenant_id`
+ALTER TABLE bookings ADD INDEX idx_tenant_status (tenant_id, status);
+ALTER TABLE booking_cost_sheets ADD INDEX idx_tenant_booking (tenant_id, booking_id);
+ALTER TABLE leads ADD INDEX idx_tenant_assigned (tenant_id, assigned_to);
+ALTER TABLE customers ADD INDEX idx_tenant_mobile (tenant_id, mobile);
+ALTER TABLE property_units ADD INDEX idx_property_status (property_id, status);
+ALTER TABLE webhook_logs ADD INDEX idx_idempotency_hash (provider, payload_hash);
