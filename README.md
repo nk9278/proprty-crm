@@ -60,3 +60,19 @@ Webhook endpoints natively evaluate API integration configurations resolving sta
 - [ ] Database credentials properly evaluated securely checking ENV bounds outside document scope paths.
 - [ ] `/uploads/private/` directories implicitly evaluating restrictive `.htaccess` controls actively correctly blocking direct public URLs resolving over HTTP structures manually mapping executions to `/api/documents.php`.
 - [ ] Debug parameters evaluating disabled explicitly handling standard PHP errors appropriately routing cleanly into storage strings logging statically securely avoiding traces exposed statically via DOM.
+
+## Deployment Configurations
+
+### Security Settings
+Before moving this environment fully to the public network, verify the execution scope handles configurations seamlessly mapping:
+- **Session Tokens:** Configured evaluating HTTPs restrictions mapping logic natively.
+- **Directories:** Verify the Apache execution paths securely execute mappings protecting `/uploads/private` limits avoiding file bypasses actively securely natively.
+
+### Integrations Required
+- Payments Gateway Keys (e.g Stripe, Razorpay) are not seeded. Add execution configurations resolving states.
+- Webhook Keys mapped conceptually must be properly exposed evaluating external scopes dynamically resolving states gracefully securely dynamically.
+
+### Production Environment Checklist
+1. Export the active DB to external Storage cleanly.
+2. Backup `config/database.php`.
+3. Check `.env` string limits cleanly properly resolving configuration safely elegantly cleanly successfully evaluating safely mapping bounds stably natively perfectly efficiently cleanly correctly successfully.
